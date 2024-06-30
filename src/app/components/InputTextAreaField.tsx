@@ -1,0 +1,39 @@
+import React from "react";
+import { FieldError, UseFormRegisterReturn } from "react-hook-form";
+
+interface InputFieldProps {
+  type: string;
+  label: string;
+  register: UseFormRegisterReturn<any>;
+  placeholder: string;
+  required?: boolean;
+  error?: FieldError;
+}
+
+const InputTextAreaField: React.FC<InputFieldProps> = ({
+  type,
+  label,
+  register,
+  placeholder,
+  required,
+  error,
+}) => {
+  return (
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">{label}</span>
+      </div>
+      <textarea
+        {...register}
+        placeholder={placeholder}
+        required={required}
+        className={`input input-bordered w-full max-w-xl ${
+          error ? "input-error" : ""
+        }`}
+      />
+      {error && <p className="text-error">{error.message}</p>}
+    </label>
+  );
+};
+
+export default InputTextAreaField;
