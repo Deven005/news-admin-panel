@@ -131,6 +131,27 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
             className="card-body max-h-80 overflow-y-auto"
             style={{ width: "inherit" }}
           >
+            <div className="card-actions justify-end">
+              <button
+                className="btn btn-square btn-sm"
+                onClick={() => router.back()}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
             <h2 className="card-title">
               {isEdit == false ? "Add" : "Update"} Historical place
             </h2>
@@ -144,11 +165,10 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
               />
               <p>{errors.placeName?.message}</p>
               <InputTextAreaField
-                register={register("placeDescription")}
-                type={"text"}
-                label={"Place Description"}
-                placeholder={"Enter place description"}
-              />
+                  register={register("placeDescription")}
+                  type={"text"}
+                  label={"Place Description"}
+                  placeholder={"Enter place description"} rows={0}              />
               <p>{errors.placeDescription?.message}</p>
               <label className="form-control w-full max-w-xl">
                 <div className="label">

@@ -1,7 +1,7 @@
+import LoginForm from "@/app/components/auth/login/LoginForm";
 import React from "react";
-import LoginForm from "../../components/auth/login/LoginForm";
 
-const Login = () => {
+const Register = () => {
   return (
     <div className="h-screen flex items-center justify-center">
       <section className="">
@@ -16,9 +16,8 @@ const Login = () => {
                     alt="Sample image"
                   />
                 </div>
-
                 <div className="mb-12 md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12">
-                  <LoginForm type={"login"} />
+                  <LoginForm type={"register"} />
                 </div>
               </div>
             </div>
@@ -29,4 +28,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

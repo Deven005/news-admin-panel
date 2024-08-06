@@ -2,9 +2,10 @@
 import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
+import Loading from "../../Loading";
 
 type FormData = {
   email: string;
@@ -19,6 +20,7 @@ const validateSchema = Yup.object()
     password: Yup.string()
       .required("This field is required")
       .min(8, "Password must be 8 or more characters")
+      .default("Abc@1234")
       .matches(
         /(?=.*[a-z])(?=.*[A-Z])\w+/,
         "Password should contain at least one uppercase and lowercase character"
@@ -39,22 +41,27 @@ const validateSchema = Yup.object()
   })
   .required();
 
-const LoginForm = () => {
-  // const [loading, setLoading] = useState(true);
+type LoginType = {
+  type: string;
+};
+
+const LoginForm = ({ type }: LoginType) => {
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
   // const [user, setUser] = useState<User | null>();
   const router = useRouter();
 
   const user = useStoreState((state) => state.auth.user);
   const login = useStoreActions((state) => state.auth.login);
 
-  useEffect(() => {
-    console.log("User: ", user);
-    if (user) {
-      router.push("/");
-    } else {
-      router.push("/auth/login");
-    }
-  }, []);
+  // useEffect(() => {
+  //   console.log("User: ", user);
+  //   if (user) {
+  //     router.push("/");
+  //   } else {
+  //     router.push("/auth/login");
+  //   }
+  // }, [user]);
 
   const {
     register,
@@ -68,23 +75,42 @@ const LoginForm = () => {
   async function onSubmit(event: FormData) {
     try {
       // event.preventDefault();
+      setLoading(true);
       const { email, password } = event;
-      await login({ email, password });
+      console.log("password: ", password);
+
+      switch (type) {
+        case "login":
+          await login({ email, password });
+          break;
+
+        case "register":
+          break;
+
+        default:
+          console.log("Not supported type Login Form");
+          break;
+      }
+      setLoading(false);
       router.push("/");
     } catch (error) {
+      setLoading(false);
+      setShowPass(true);
       console.log("login catch: ", error);
     }
   }
-
-  return (
+  // loading
+  return loading ? (
+    <Loading />
+  ) : (
     <div>
       {/* <p>isAdmin: {isAdmin}</p> */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-row items-center justify-center lg:justify-start">
           {/* <p className="mb-0 mr-4 text-lg">Sign in with</p> */}
-          <h2 className="card-title mb-0 mr-4 text-lg">Sign in with</h2>
+          <h2 className="card-title mb-0 mr-4 text-lg">Sign in</h2>
 
-          <button
+          {/* <button
             type="button"
             data-te-ripple-init
             data-te-ripple-color="light"
@@ -130,12 +156,12 @@ const LoginForm = () => {
             >
               <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
             </svg>
-          </button>
+          </button> */}
         </div>
 
-        <div className="my-4 flex items-center before:mt-0.5 before:flex-1 before:border-t after:mt-0.5 after:flex-1 after:border-t">
+        {/* <div className="my-4 flex items-center before:mt-0.5 before:flex-1 before:border-t after:mt-0.5 after:flex-1 after:border-t">
           <p className="mx-4 mb-0 text-center font-semibold text-black">Or</p>
-        </div>
+        </div> */}
 
         <p>{errors.root?.message}</p>
 
@@ -171,38 +197,43 @@ const LoginForm = () => {
           </div>
         )}
 
-        <label className="form-control w-full max-w-xl">
-          <div className="label">
-            <span className="label-text">Password</span>
-          </div>
-          <input
-            type="password"
-            {...register("password")}
-            placeholder="Password"
-            required={true}
-            className="input input-bordered w-full max-w-xl"
-          />
-        </label>
+        {showPass && (
+          <>
+            <label className="form-control w-full max-w-xl">
+              <div className="label">
+                <span className="label-text">Password</span>
+              </div>
+              <input
+                type="password"
+                {...register("password")}
+                placeholder="Password"
+                required={true}
+                defaultValue={"123456"}
+                className="input input-bordered w-full max-w-xl"
+              />
+            </label>
 
-        {errors.password != undefined &&
-          errors.password.message != undefined && (
-            <div role="alert" className="alert alert-error">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="stroke-current shrink-0 h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <p>{errors.password?.message}</p>
-            </div>
-          )}
+            {errors.password != undefined &&
+              errors.password.message != undefined && (
+                <div role="alert" className="alert alert-error">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="stroke-current shrink-0 h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <p>{errors.password?.message}</p>
+                </div>
+              )}
+          </>
+        )}
 
         <div className="mb-6 flex items-center justify-between">
           <div className="mb-[0.125rem] block min-h-[1.5rem] pl-[1.5rem]">

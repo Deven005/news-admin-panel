@@ -17,6 +17,7 @@ export default function Home() {
   const user = useStoreState((state) => state.auth.user);
   const isRehydrated = useStoreRehydrated();
   const loginSuccess = useStoreActions((state) => state.auth.loginSuccess);
+  // const logout = useStoreActions((state) => state.auth.logout);
   // const addTodo = useStoreActions(
   //   (actions: Action<StoreModel>) => actions.addTodo
   // );
@@ -35,6 +36,7 @@ export default function Home() {
           loginSuccess({ claims, token, user });
           setIsLoading(false);
         } else {
+          // logout(null);
           router.push("/auth/login");
           setIsLoading(false);
         }

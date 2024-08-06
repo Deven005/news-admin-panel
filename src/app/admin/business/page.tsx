@@ -133,7 +133,6 @@ const Business = () => {
         }`,
         formData: new FormData(),
         callType: "d",
-        token: token,
       });
       setCategoryToEditOrDelete(undefined);
       setIsDeleteModalOpen(false);
@@ -165,7 +164,6 @@ const Business = () => {
 
           {isModalOpen && (
             <AddCategoryForm
-              token={token}
               isModalOpen={isModalOpen}
               setIsModalOpen={setIsModalOpen}
               isEditCategory={isEditCategory}

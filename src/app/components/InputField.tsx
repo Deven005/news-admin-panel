@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  FieldError,
-  FieldValues,
-  UseFormRegister,
-  UseFormRegisterReturn,
-} from "react-hook-form";
+import { FieldError, UseFormRegisterReturn } from "react-hook-form";
 
 interface InputFieldProps {
   type: string;
@@ -15,6 +10,8 @@ interface InputFieldProps {
   error?: FieldError;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   accept?: string;
+  className?: string;
+  name?: string;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -26,9 +23,11 @@ const InputField: React.FC<InputFieldProps> = ({
   error,
   onChange,
   accept,
+  className,
+  name,
 }) => {
   return (
-    <label className="form-control w-full max-w-xl">
+    <label className={`form-control w-full max-w-xl ${className}`}>
       <div className="label">
         <span className="label-text">{label}</span>
       </div>
@@ -43,6 +42,7 @@ const InputField: React.FC<InputFieldProps> = ({
         onChange={onChange}
         multiple
         accept={accept}
+        name={name}
       />
       {error && <p className="text-error">{error.message}</p>}
     </label>

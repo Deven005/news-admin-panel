@@ -84,15 +84,16 @@ function AddUpdateReporterForm({
       addUpdateReporterForm.append("reporterLastName", reporterLastName);
       addUpdateReporterForm.append("reporterEmail", reporterEmail);
 
+      console.log("isEditReporter: ", isEditReporter);
+
       const response = await doApiCall({
         url: `/reporter${
           isEditReporter ? `/${reporterToEditOrDelete?.reporterID}` : ""
         }`,
         formData: addUpdateReporterForm,
         callType: `${isEditReporter ? "p" : ""}`,
-        token: "",
       });
-      
+
       console.log(
         `${isEditReporter ? "Update" : "Add"} reporter response: `,
         response
@@ -108,7 +109,7 @@ function AddUpdateReporterForm({
     <div className={`modal ${isModalOpen ? "modal-open" : ""}`}>
       <div className="modal-box">
         <h3 className="font-bold text-lg">
-          {isEditReporter ? "Edit" : "Add"} Reporter!
+          {isEditReporter ? "Update" : "Add"} Reporter!
         </h3>
 
         {isLoading ? (
@@ -188,47 +189,49 @@ function AddUpdateReporterForm({
                 )}
             </div>
 
-            <div className="mb-4">
-              <label className="form-control w-full max-w-xl">
-                <div className="label">
-                  <span className="label-text">Reporter Email</span>
-                </div>
-                <input
-                  type="email"
-                  {...register("reporterEmail")}
-                  placeholder="Reporter Email"
-                  required={true}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
-                />
-              </label>
-
-              {errors.reporterEmail != undefined &&
-                errors.reporterEmail?.message != undefined && (
-                  <div role="alert" className="alert alert-error">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="stroke-current shrink-0 h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <p>{errors.reporterEmail?.message}</p>
+            {!isEditReporter && (
+              <div className="mb-4">
+                <label className="form-control w-full max-w-xl">
+                  <div className="label">
+                    <span className="label-text">Reporter Email</span>
                   </div>
-                )}
-            </div>
+                  <input
+                    type="email"
+                    {...register("reporterEmail")}
+                    placeholder="Reporter Email"
+                    required={true}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                  />
+                </label>
+
+                {errors.reporterEmail != undefined &&
+                  errors.reporterEmail?.message != undefined && (
+                    <div role="alert" className="alert alert-error">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="stroke-current shrink-0 h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <p>{errors.reporterEmail?.message}</p>
+                    </div>
+                  )}
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="submit"
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
               >
-                {isEditReporter ? "Edit" : "Create"} Reporter
+                {isEditReporter ? "Update" : "Create"} Reporter
               </button>
               <button
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"

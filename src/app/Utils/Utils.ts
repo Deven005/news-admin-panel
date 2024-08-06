@@ -12,6 +12,7 @@ const reporterCollectionName: string = "reporterList";
 const categoryCollectionName: string = "categoryList";
 const historicalPlaceCollectionName: string = "historicalPlaceList";
 const talukaCollectionName: string = "talukaList";
+const newsCollectionName: string = "newsList";
 
 async function doApiCall({ url, formData, callType }: ApiCallInput) {
   var methodType = "";
@@ -34,10 +35,15 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
   const headers = new Headers();
   headers.append(
     "Authorization",
-    `Authorization ${await auth.currentUser?.getIdToken()}`
+    `Bearer ${await auth.currentUser?.getIdToken()}`
   );
 
-  return fetch(`http://localhost:3000/api${url}`, {
+  // "https://news-backend-45h4p5l4ua-el.a.run.app/api".includes('');
+  // https://news-admin-panel-45h4p5l4ua-el.a.run.app/auth/login
+
+  // http://localhost:8080/api
+
+  return fetch(`http://localhost:8080/api${url}`, {
     method: methodType,
     body: formData,
     headers: headers,
@@ -52,4 +58,5 @@ export {
   categoryCollectionName,
   historicalPlaceCollectionName,
   talukaCollectionName,
+  newsCollectionName
 };

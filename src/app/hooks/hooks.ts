@@ -3,6 +3,7 @@ import { AuthModel } from "../store/models/auth/authModel";
 import { CategoriesModel } from "../store/models/categoriesModel";
 import { ReporterModel } from "../store/models/reporter/reporterModel";
 import { HistoricalPlaceModel } from "../store/models/historical-places/historicalPlacesModel";
+import { NewsTypeModel } from "../store/models/news/NewsModel";
 
 const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
   createTypedHooks<{
@@ -10,6 +11,7 @@ const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
     category: CategoriesModel;
     reporter: ReporterModel;
     historicalPlace: HistoricalPlaceModel;
+    news: NewsTypeModel;
   }>();
 
 export { useStoreActions, useStoreState, useStoreDispatch, useStore };

@@ -4,6 +4,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "easy-peasy";
 import { store } from "./store/store";
+import Script from "next/script";
+import MyNavBar from "./components/MyNavBar";
+import { useStoreState } from "./hooks/hooks";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="winter">
       <head>
-        <script src="http://localhost:8097"></script>
+        <Script src="http://localhost:8097"></Script>
       </head>
       <body className={inter.className}>
         <StoreProvider store={store}>{children}</StoreProvider>

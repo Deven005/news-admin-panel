@@ -1,6 +1,10 @@
 import { auth } from "@/app/firebase/config";
 import { action, Action, thunk, Thunk } from "easy-peasy";
-import { signInWithEmailAndPassword, User } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  User,
+} from "firebase/auth";
 import { store } from "../../store";
 
 interface LoginInputModel {
@@ -17,10 +21,12 @@ export interface AuthModel {
   user: User | undefined;
   login: Thunk<AuthModel, LoginInputModel, Promise<void>>;
   loginSuccess: Action<AuthModel, any>;
+  register: Thunk<AuthModel, LoginInputModel, Promise<void>>;
+  registerSuccess: Action<AuthModel, any>;
   setLoading: Action<AuthModel, boolean>;
   setToken: Action<AuthModel, string>;
   setUser: Action<AuthModel, User | undefined>;
-  // logout: Thunk<AuthModel, null>;
+  logout: Thunk<AuthModel, null>;
 }
 
 const authModel: AuthModel = {
@@ -51,6 +57,31 @@ const authModel: AuthModel = {
     state.isReporter = "isReporter" in claims ? "true" : "false" || "false";
     state.isAuthenticated = "true";
     state.token = token;
+
+    console.log("claims: ", claims);
+  }),
+  register: thunk(async (actions, payload) => {
+    try {
+      const { email, password } = payload;
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const { claims, token } = await user.getIdTokenResult();
+      actions.registerSuccess({ claims, token, user });
+    } catch (error) {
+      console.log("error register auth store: ", error);
+      throw error;
+    }
+  }),
+  registerSuccess: action((state, payload) => {
+    const { claims, token, user } = payload;
+    state.user = user;
+    state.isReporter = "isReporter" in claims ? "true" : "false" || "false";
+    state.isAuthenticated = "true";
+    state.token = token;
+    console.log("claims: ", claims);
   }),
   setToken: action((state, payload) => {
     state.token = payload;
@@ -58,17 +89,18 @@ const authModel: AuthModel = {
   setUser: action((state, payload) => {
     state.user = payload;
   }),
-  // logout: thunk(async (actions, payload, { getState }) => {
-  //   try {
-  //     getState().isLoading = true;
-  //     await auth.signOut();
-  //     store.persist.clear().then().catch();
-  //     getState().isLoading = false;
-  //   } catch (error) {
-  //     console.log("Logout ACtion Error: ", error);
-  //     getState().isLoading = false;
-  //   }
-  // }),
+  logout: thunk(async (actions, payload, { getState }) => {
+    try {
+      getState().isLoading = true;
+      await auth.signOut();
+      store.persist.clear().then().catch();
+      getState().isLoading = false;
+      console.log("Logout logout ");
+    } catch (error) {
+      console.log("Logout ACtion Error: ", error);
+      getState().isLoading = false;
+    }
+  }),
 };
 
 export { authModel };

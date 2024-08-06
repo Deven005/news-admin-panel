@@ -1,0 +1,92 @@
+[debug] [2024-08-04T11:04:16.493Z] ----------------------------------------------------------------------
+[debug] [2024-08-04T11:04:16.496Z] Command:       C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\firebase-tools\lib\bin\firebase.js init hosting
+[debug] [2024-08-04T11:04:16.497Z] CLI Version:   13.7.2
+[debug] [2024-08-04T11:04:16.497Z] Platform:      win32
+[debug] [2024-08-04T11:04:16.498Z] Node Version:  v20.10.0
+[debug] [2024-08-04T11:04:16.498Z] Time:          Sun Aug 04 2024 16:34:16 GMT+0530 (India Standard Time)
+[debug] [2024-08-04T11:04:16.498Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-08-04T11:04:16.502Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2024-08-04T11:04:16.572Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-08-04T11:04:16.573Z] > authorizing via signed-in user (mymartplac@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\Deven\Desktop\Durgesh Work\news-admin-panel
+
+[debug] [2024-08-04T11:04:17.315Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2024-08-04T11:04:17.316Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-08-04T11:04:20.030Z] > refreshing access token with scopes: []
+[debug] [2024-08-04T11:04:20.031Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2024-08-04T11:04:20.032Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-08-04T11:04:20.345Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2024-08-04T11:04:20.345Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-08-04T11:04:20.450Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2024-08-04T11:04:21.243Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2024-08-04T11:04:21.244Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project mydhule-3635d (MyDhule) 
+[info] 
+=== Hosting Setup
+[debug] [2024-08-04T11:04:27.389Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/mydhule-3635d [none]
+[debug] [2024-08-04T11:04:27.897Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/mydhule-3635d 200
+[debug] [2024-08-04T11:04:27.897Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/mydhule-3635d {"projectId":"mydhule-3635d","projectNumber":"573329204030","displayName":"MyDhule","name":"projects/mydhule-3635d","resources":{"hostingSite":"mydhule-3635d","storageBucket":"mydhule-3635d.appspot.com","locationId":"asia-south1"},"state":"ACTIVE","etag":"1_a2809e39-21c0-4bd0-a452-45f9554724b6"}
+[debug] [2024-08-04T11:04:46.418Z] SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at findDependency (C:\Users\Deven\AppData\Roaming\nvm\v20.10.0\node_modules\firebase-tools\lib\frameworks\utils.js:188:23)
+    at getNextVersion (C:\Users\Deven\AppData\Roaming\nvm\v20.10.0\node_modules\firebase-tools\lib\frameworks\next\utils.js:196:51)
+    at discover (C:\Users\Deven\AppData\Roaming\nvm\v20.10.0\node_modules\firebase-tools\lib\frameworks\next\index.js:41:48)
+    at async discover (C:\Users\Deven\AppData\Roaming\nvm\v20.10.0\node_modules\firebase-tools\lib\frameworks\index.js:47:32)
+    at async doSetup (C:\Users\Deven\AppData\Roaming\nvm\v20.10.0\node_modules\firebase-tools\lib\init\features\hosting\index.js:54:11)
+    at async init (C:\Users\Deven\AppData\Roaming\nvm\v20.10.0\node_modules\firebase-tools\lib\init\index.js:37:9)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2024-08-04T11:04:56.747Z] ----------------------------------------------------------------------
+[debug] [2024-08-04T11:04:56.751Z] Command:       C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\firebase-tools\lib\bin\firebase.js init hosting
+[debug] [2024-08-04T11:04:56.751Z] CLI Version:   13.7.2
+[debug] [2024-08-04T11:04:56.752Z] Platform:      win32
+[debug] [2024-08-04T11:04:56.752Z] Node Version:  v20.10.0
+[debug] [2024-08-04T11:04:56.752Z] Time:          Sun Aug 04 2024 16:34:56 GMT+0530 (India Standard Time)
+[debug] [2024-08-04T11:04:56.752Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-08-04T11:04:56.762Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-08-04T11:04:56.763Z] > authorizing via signed-in user (mymartplac@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\Deven\Desktop\Durgesh Work\news-admin-panel
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2024-08-04T11:05:04.860Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2024-08-04T11:05:05.872Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2024-08-04T11:05:05.872Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project mydhule-3635d (MyDhule) 
+[info] 
+=== Hosting Setup
+[debug] [2024-08-04T11:05:09.104Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/mydhule-3635d [none]
+[debug] [2024-08-04T11:05:09.482Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/mydhule-3635d 200
+[debug] [2024-08-04T11:05:09.482Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/mydhule-3635d {"projectId":"mydhule-3635d","projectNumber":"573329204030","displayName":"MyDhule","name":"projects/mydhule-3635d","resources":{"hostingSite":"mydhule-3635d","storageBucket":"mydhule-3635d.appspot.com","locationId":"asia-south1"},"state":"ACTIVE","etag":"1_a2809e39-21c0-4bd0-a452-45f9554724b6"}

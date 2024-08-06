@@ -6,8 +6,8 @@ import { historicalPlaceCollectionName } from "@/app/Utils/Utils";
 import { collection, onSnapshot } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { HistoricalPlace } from "c:/Users/Deven/Desktop/Durgesh Work/news-admin-panel/src/app/store/models/historical-places/historicalPlacesModel";
 import Loading from "@/app/components/Loading";
+import { HistoricalPlace } from "@/app/store/models/historical-places/historicalPlacesModel";
 
 const HistoricalPlaces = () => {
   const [isLoading, setIsLoading] = useState(false);

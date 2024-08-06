@@ -1,8 +1,7 @@
 "use client";
 import HistoricalPlacesAddEdit from "@/app/components/historical-places/create-or-edit/HistoricalPlacesAddEdit";
 import { useStoreState } from "@/app/hooks/hooks";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const PlaceDetailsPage: React.FC = () => {
   const pathname = usePathname();
