@@ -4,9 +4,11 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "easy-peasy";
 import { store } from "./store/store";
-import Script from "next/script";
+import { RouteChangeListener } from "./hooks/useRouteChangeListener";
 import MyNavBar from "./components/MyNavBar";
-import { useStoreState } from "./hooks/hooks";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import PageTransition from "./components/PageTransition";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,11 +24,27 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="winter">
-      <head>
-        <Script src="http://localhost:8097"></Script>
-      </head>
+      <head>{/* <Script src="http://localhost:8097"></Script> */}</head>
       <body className={inter.className}>
-        <StoreProvider store={store}>{children}</StoreProvider>
+        <PageTransition>
+          <StoreProvider store={store}>
+            <ToastContainer
+              position="top-right"
+              autoClose={500}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
+            <MyNavBar />
+            <RouteChangeListener />
+            {children}
+          </StoreProvider>
+        </PageTransition>
       </body>
     </html>
   );

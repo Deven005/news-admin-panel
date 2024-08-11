@@ -1,5 +1,8 @@
-import { action, Action } from "easy-peasy";
-import { DocumentChangeType, DocumentData } from "firebase/firestore";
+import { firestore } from "@/app/firebase/config";
+import { newsCollectionName } from "@/app/Utils/Utils";
+import { action, Action, thunk, Thunk } from "easy-peasy";
+import { collection, onSnapshot } from "firebase/firestore";
+import firebase from "firebase/compat/app";
 
 interface NewsType {
   id: string;
@@ -13,80 +16,117 @@ interface NewsType {
   dislikes: number;
   views: number;
   shares: number;
-  timestampCreatedAt: Date;
-  timestampUpdatedAt: Date;
+  timestampCreatedAt: firebase.firestore.Timestamp;
+  timestampUpdatedAt: firebase.firestore.Timestamp;
   likedByUsers: string[];
   disLikedByUsers: string[];
 }
 
-interface ChangeInNewsType {
-  type: DocumentChangeType;
-  docID: string;
-  placesData: DocumentData;
-}
-
 export interface NewsTypeModel {
+  loading: boolean;
+  setLoading: Action<NewsTypeModel, boolean>;
   news: NewsType[];
-  changeNews: Action<NewsTypeModel, ChangeInNewsType>;
+  setNews: Action<NewsTypeModel, NewsType[]>;
+  changeNews: Thunk<NewsTypeModel>;
 }
 
 const newsModel: NewsTypeModel = {
   news: [],
-  changeNews: action((state, payload) => {
-    const { type, docID, placesData } = payload;
-    var changedPlaceIndex: number = state.news.findIndex(
-      (val) => val.id == docID
+  setNews: action((state, payload) => {
+    state.news = payload;
+  }),
+  changeNews: thunk((actions) => {
+    actions.setLoading(true);
+    const unsubscribe = onSnapshot(
+      collection(firestore, newsCollectionName),
+      (snapshot) => {
+        actions.setLoading(true);
+        actions.setNews([
+          ...(snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as NewsType[]),
+        ]);
+        actions.setLoading(false);
+      }
     );
+    return () => unsubscribe();
 
-    switch (type) {
-      case "added":
-        if (changedPlaceIndex == -1) {
-          state.news.push({
-            id: docID,
-            title: placesData["title"],
-            description: placesData["description"],
-            isActive: placesData["isActive"],
-            image: placesData["image"],
-            talukaID: placesData["talukaID"],
-            imagePath: placesData["imagePath"],
-            likes: placesData["likes"],
-            dislikes: placesData["dislikes"],
-            views: placesData["views"],
-            shares: placesData["shares"],
-            timestampCreatedAt: placesData["timestampCreatedAt"],
-            timestampUpdatedAt: placesData["timestampUpdatedAt"],
-            likedByUsers: placesData["likedByUsers"],
-            disLikedByUsers: placesData["disLikedByUsers"],
-          });
-        }
-        break;
-      case "modified":
-        if (changedPlaceIndex !== -1) {
-          state.news[changedPlaceIndex] = {
-            id: docID,
-            title: placesData["title"],
-            description: placesData["description"],
-            isActive: placesData["isActive"],
-            image: placesData["image"],
-            talukaID: placesData["talukaID"],
-            imagePath: placesData["imagePath"],
-            likes: placesData["likes"],
-            dislikes: placesData["dislikes"],
-            views: placesData["views"],
-            shares: placesData["shares"],
-            timestampCreatedAt: placesData["timestampCreatedAt"],
-            timestampUpdatedAt: placesData["timestampUpdatedAt"],
-            likedByUsers: placesData["likedByUsers"],
-            disLikedByUsers: placesData["disLikedByUsers"],
-          };
-        }
-        break;
-      case "removed":
-        if (changedPlaceIndex !== -1) {
-          state.news.splice(changedPlaceIndex, 1);
-        }
-        break;
-    }
+    // var changedPlaceIndex: number = state.news.findIndex(
+    //   (val) => val.id == docID
+    // );
+
+    // switch (type) {
+    //   case "added":
+    //     if (changedPlaceIndex == -1) {
+    //       state.news.push({
+    //         id: docID,
+    //         title: newsData["title"],
+    //         description: newsData["description"],
+    //         isActive: newsData["isActive"],
+    //         image: newsData["image"],
+    //         talukaID: newsData["talukaID"],
+    //         imagePath: newsData["imagePath"],
+    //         likes: newsData["likes"],
+    //         dislikes: newsData["dislikes"],
+    //         views: newsData["views"],
+    //         shares: newsData["shares"],
+    //         timestampCreatedAt: newsData["timestampCreatedAt"],
+    //         timestampUpdatedAt: newsData["timestampUpdatedAt"],
+    //         likedByUsers: newsData["likedByUsers"],
+    //         disLikedByUsers: newsData["disLikedByUsers"],
+    //       });
+    //     } else if (changedPlaceIndex === 1) {
+    //       state.news[changedPlaceIndex] = {
+    //         id: docID,
+    //         title: newsData["title"],
+    //         description: newsData["description"],
+    //         isActive: newsData["isActive"],
+    //         image: newsData["image"],
+    //         talukaID: newsData["talukaID"],
+    //         imagePath: newsData["imagePath"],
+    //         likes: newsData["likes"],
+    //         dislikes: newsData["dislikes"],
+    //         views: newsData["views"],
+    //         shares: newsData["shares"],
+    //         timestampCreatedAt: newsData["timestampCreatedAt"],
+    //         timestampUpdatedAt: newsData["timestampUpdatedAt"],
+    //         likedByUsers: newsData["likedByUsers"],
+    //         disLikedByUsers: newsData["disLikedByUsers"],
+    //       };
+    //     }
+    //     break;
+    //   case "modified":
+    //     if (changedPlaceIndex !== -1) {
+    //       state.news[changedPlaceIndex] = {
+    //         id: docID,
+    //         title: newsData["title"],
+    //         description: newsData["description"],
+    //         isActive: newsData["isActive"],
+    //         image: newsData["image"],
+    //         talukaID: newsData["talukaID"],
+    //         imagePath: newsData["imagePath"],
+    //         likes: newsData["likes"],
+    //         dislikes: newsData["dislikes"],
+    //         views: newsData["views"],
+    //         shares: newsData["shares"],
+    //         timestampCreatedAt: newsData["timestampCreatedAt"],
+    //         timestampUpdatedAt: newsData["timestampUpdatedAt"],
+    //         likedByUsers: newsData["likedByUsers"],
+    //         disLikedByUsers: newsData["disLikedByUsers"],
+    //       };
+    //     }
+    //     break;
+    //   case "removed":
+    //     if (changedPlaceIndex !== -1) {
+    //       state.news.splice(changedPlaceIndex, 1);
+    //     }
+    //     break;
+    // }
+  }),
+  loading: false,
+  setLoading: action((state, payload) => {
+    state.loading = payload;
   }),
 };
 

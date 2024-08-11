@@ -69,66 +69,60 @@ function ReporterView() {
     setIsModalOpen(true);
   }
 
-  return (
+  return isLoading ? (
+    <p className="text-center pt-20">Loading...</p>
+  ) : (
     <>
-      <MyNavBar />
-      {isLoading ? (
-        <p className="text-center pt-20">Loading...</p>
+      <button className="btn text-right" onClick={() => setIsModalOpen(true)}>
+        Add Reporter
+      </button>
+
+      {isModalOpen && (
+        <AddUpdateReporterForm
+          token={token}
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          isEditReporter={isEditReporter}
+          setIsEditReporter={setIsEditReporter}
+          reporterToEditOrDelete={reporterToEditOrDelete}
+          setReporterToEditOrDelete={setReporterToEditOrDelete}
+        />
+      )}
+
+      {reporters && reporters.length == 0 ? (
+        <p>No data to show!</p>
       ) : (
-        <>
-          <button
-            className="btn text-right"
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add Reporter
-          </button>
-
-          {isModalOpen && (
-            <AddUpdateReporterForm
-              token={token}
-              isModalOpen={isModalOpen}
-              setIsModalOpen={setIsModalOpen}
-              isEditReporter={isEditReporter}
-              setIsEditReporter={setIsEditReporter}
-              reporterToEditOrDelete={reporterToEditOrDelete}
-              setReporterToEditOrDelete={setReporterToEditOrDelete}
-            />
-          )}
-
-          {reporters && reporters.length == 0 ? (
-            <p>No data to show!</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-zebra">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Email</th>
-                    <th></th>
-                    {/* <th></th> */}
-                  </tr>
-                </thead>
-                <tbody>
-                  {reporters.map((reporter, index) => {
-                    return (
-                      <tr key={index}>
-                        <th>{index + 1}</th>
-                        <td>{reporter.reporterFirstName}</td>
-                        <td>{reporter.reporterLastName}</td>
-                        <td>{reporter.reporterEmail}</td>
-                        <td>
-                          <button
-                            className="btn btn-outline"
-                            data-te-ripple-init
-                            data-te-ripple-color="light"
-                            onClick={() => editReporterClickHandler(reporter)}
-                          >
-                            Edit
-                          </button>
-                        </td>
-                        {/* <td>
+        <div className="overflow-x-auto">
+          <table className="table table-zebra text-center">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th></th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Actions</th>
+                {/* <th></th> */}
+              </tr>
+            </thead>
+            <tbody>
+              {reporters.map((reporter, index) => {
+                return (
+                  <tr key={index}>
+                    <th>{index + 1}</th>
+                    <td>{reporter.reporterFirstName}</td>
+                    <td>{reporter.reporterLastName}</td>
+                    <td>{reporter.reporterEmail}</td>
+                    <td>
+                      <button
+                        className="btn btn-outline"
+                        data-te-ripple-init
+                        data-te-ripple-color="light"
+                        onClick={() => editReporterClickHandler(reporter)}
+                      >
+                        Edit
+                      </button>
+                    </td>
+                    {/* <td>
                           <button
                             className="btn btn-outline btn-error"
                             data-te-ripple-init
@@ -138,14 +132,12 @@ function ReporterView() {
                             Delete
                           </button>
                         </td> */}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </>
   );

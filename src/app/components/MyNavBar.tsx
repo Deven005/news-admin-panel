@@ -1,35 +1,48 @@
 "use client";
 import Link from "next/link";
 import React from "react";
-import { useStoreState } from "../hooks/hooks";
-import { auth } from "../firebase/config";
-import { store } from "../store/store";
+import { useStoreActions, useStoreState } from "../hooks/hooks";
 
 const MyNavBar = () => {
-  // const logout = useStoreActions((state) => state.auth.logout);
-  const isAdmin = useStoreState((state) => state.auth.isAdmin);
+  const { logout } = useStoreActions((state) => state.auth);
+  const { isAdmin, isReporter } = useStoreState((state) => state.auth);
   return (
     <>
       <div className="navbar bg-base-100">
         <div className="navbar-start">
-          <Link className="btn btn-ghost text-xl" href={"/"}>
-            {isAdmin ? "Admin" : "Reporter"} Panel
+          <Link className="btn btn-ghost text-xl" href="/">
+            {isAdmin ? "Admin" : isReporter ? "Reporter" : ""} Panel
           </Link>
         </div>
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
-            <li>
-              <Link href={"/admin/news"}>News</Link>
-            </li>
-            <li>
-              <Link href={"/admin/business"}>Business</Link>
-            </li>
-            <li>
-              <Link href={"/admin/reporter"}>Reporter</Link>
-            </li>
-            <li>
-              <Link href={"/admin/historical-places"}>Historical Places</Link>
-            </li>
+            {isAdmin ? (
+              <>
+                <li>
+                  <Link href={"/admin/taluka"}>Taluka</Link>
+                </li>
+                <li>
+                  <Link href={"/admin/news"}>News</Link>
+                </li>
+                <li>
+                  <Link href={"/admin/business"}>Business</Link>
+                </li>
+                <li>
+                  <Link href={"/admin/reporter"}>Reporter</Link>
+                </li>
+                <li>
+                  <Link href={"/admin/historical-places"}>
+                    Historical Places
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Link href={"/reporter/news"}>News</Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
 
@@ -61,15 +74,7 @@ const MyNavBar = () => {
                 <Link href={""}>Settings</Link>
               </li> */}
               <li>
-                <p
-                  onClick={async () => {
-                    await store.persist.flush();
-                    await store.persist.clear();
-                    await auth.signOut();
-                  }}
-                >
-                  Logout
-                </p>
+                <p onClick={() => logout(null)}>Logout</p>
               </li>
             </ul>
           </div>

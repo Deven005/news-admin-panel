@@ -1,332 +1,204 @@
 "use client";
+import { useState, useEffect, useRef } from "react";
+import Loading from "@/app/components/Loading";
+import { doApiCall, showToast } from "@/app/Utils/Utils";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import Image from "next/image";
-import { doApiCall } from "@/app/Utils/Utils";
-import TalukaDropdown from "../admin/taluka/TalukaDropdown";
+import React from "react";
 import { NewsType } from "@/app/store/models/news/NewsModel";
+import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 
 interface NewsFormProps {
-  mode: string;
-  initialData?: NewsType;
+  news?: NewsType;
 }
 
-const NewsForm = ({ mode, initialData }: NewsFormProps) => {
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [news, setNews] = useState<NewsType>({
-    id: "",
-    title: "",
-    description: "",
-    image: "",
-    imagePath: "",
-    talukaID: initialData?.talukaID ?? "",
-    isActive: false,
-    likes: 0,
-    dislikes: 0,
-    views: 0,
-    shares: 0,
-    timestampCreatedAt: new Date(),
-    timestampUpdatedAt: new Date(),
-    likedByUsers: [],
-    disLikedByUsers: [],
-    ...initialData,
-  });
-  const [selectedImage, setSelectedImage] = useState<
-    string | ArrayBuffer | null
-  >(null);
-
+const NewsForm = ({ news }: NewsFormProps) => {
+  const [title, setTitle] = useState(news?.title || "");
+  const [description, setDescription] = useState(news?.description || "");
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(
+    news?.image || ""
+  );
+  const { loading } = useStoreState((state) => state.news);
+  const talukas = useStoreState((state) => state.taluka.talukas);
+  const [selectedTaluka, setSelectedTaluka] = useState<string>(talukas[0]?.id);
+  const { setLoading } = useStoreActions((state) => state.news);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
-
-  const {
-    register,
-    setValue,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<NewsType>({
-    defaultValues: {
-      id: "",
-      title: "",
-      description: "",
-      image: "",
-      imagePath: "",
-      talukaID: initialData?.talukaID ?? "",
-      isActive: false,
-      likes: 0,
-      dislikes: 0,
-      views: 0,
-      shares: 0,
-      timestampCreatedAt: new Date(),
-      timestampUpdatedAt: new Date(),
-      likedByUsers: [],
-      disLikedByUsers: [],
-      ...initialData,
-    },
-  });
-
-  useEffect(() => {
-    if (initialData) {
-      Object.keys(initialData).forEach((key) => {
-        // Set values for each field
-        setValue(key as keyof NewsType, initialData[key as keyof NewsType]);
-      });
-      setNews(initialData);
-    }
-  }, [initialData, setValue]);
+  const isEditing = !!news;
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const file = event.target.files?.[0] || null;
+    setImage(file);
     if (file) {
-      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSelectedImage(reader.result);
-        setValue("image", URL.createObjectURL(file));
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const onSubmit = async (updatedNews: NewsType) => {
-    console.log("mode", mode);
-
-    console.log("onSubmit updatedNews: ", updatedNews);
-
-    const formData = new FormData();
-    var callType = "",
-      url = "/reporter/news";
-
-    try {
-      switch (mode) {
-        case "add":
-          if (imageFile == null) {
-            alert("Select image!");
-            return;
-          }
-          console.log("case add");
-
-          formData.append("title", updatedNews.title);
-          formData.append("description", updatedNews.description);
-          formData.append("talukaID", updatedNews.talukaID);
-          formData.append("image", imageFile);
-          break;
-        case "update":
-          callType = "p";
-          url = `${"/reporter/news"}/${news.id}`;
-          if (news.title != updatedNews.title)
-            formData.append("title", updatedNews.title);
-          if (news.description != updatedNews.description)
-            formData.append("description", updatedNews.description);
-          if (news.talukaID != updatedNews.talukaID)
-            formData.append("talukaID", updatedNews.talukaID);
-          if (news.isActive != updatedNews.isActive)
-            formData.append("isActive", String(updatedNews.isActive));
-          if (imageFile) formData.append("image", imageFile);
-          break;
-
-        default:
-          break;
-      }
-
-      const response: Response = await doApiCall({
-        url: url,
-        formData: formData,
-        callType: callType,
-      });
-      console.log("add news res: ", response);
-      //   setIsLoading(false);
-      if (!response.ok) {
-        throw new Error("Failed to add category");
-      }
-      router.back();
-    } catch (error) {
-      //   setIsLoading(false);
-      console.error("Error adding category:", error);
-      alert("Failed to add category");
+  const handleRemoveImage = () => {
+    setImage(null);
+    setImagePreview(news?.image || ""); // Reset to the initial image URL
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear the file input value
     }
   };
 
-  return (
-    <div className="min-h-screen p-6 bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 transition-transform transform hover:scale-105 duration-300">
-        <h2 className="text-3xl font-semibold mb-6 text-center">
-          {mode === "add" && "Add News"}
-          {mode === "update" && initialData ? "Update News" : ""}
-          {mode === "view" && "News Details"}
-        </h2>
-        {mode !== "view" && (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="card shadow-lg p-6 rounded-lg bg-gray-100">
-              <h3 className="text-xl font-semibold mb-4">News Details</h3>
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!title || !description) {
+      alert("Title and description are required!");
+      return;
+    }
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("talukaID", selectedTaluka);
+    if (image) {
+      formData.append("image", image);
+    }
 
-              <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  {...register("title", { required: "Title is required" })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  disabled={mode === "view"}
-                />
-                {errors.title && (
-                  <p className="text-red-500 text-xs italic">
-                    {errors.title.message}
-                  </p>
-                )}
-              </div>
+    try {
+      const url = isEditing ? `/reporter/news/${news?.id}` : "/reporter/news";
+      const callType = isEditing ? "p" : "";
 
-              <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Description
-                </label>
-                <textarea
-                  {...register("description", {
-                    required: "Description is required",
-                  })}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  rows={4}
-                  disabled={mode === "view"}
-                />
-                {errors.description && (
-                  <p className="text-red-500 text-xs italic">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
+      const response = await doApiCall({
+        url,
+        formData,
+        callType,
+      });
 
-              <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">
-                  Image
-                </label>
-                <input
-                  type="file"
-                  onChange={handleImageChange}
-                  className="w-full border border-gray-300 rounded"
-                  disabled={mode === "view"}
-                />
-                {selectedImage && mode !== "view" && (
-                  <div className="mt-4">
-                    <img
-                      src={selectedImage as string}
-                      alt="Selected"
-                      className="w-full h-64 object-cover rounded"
-                    />
-                  </div>
-                )}
-                {mode === "view" && initialData?.image && (
-                  <div className="mt-4">
-                    <Image
-                      src={initialData.image}
-                      alt={initialData.title}
-                      width={500}
-                      height={300}
-                      className="w-full h-64 object-cover rounded"
-                    />
-                  </div>
-                )}
-              </div>
+      if (!response.ok) {
+        throw new Error(`Failed to ${isEditing ? "update" : "add"} news`);
+      }
+      showToast(`${isEditing ? "Updated" : "Added"} news`, "s");
+      router.back();
+    } catch (error) {
+      // console.error(`${isEditing ? "Update" : "Add"} news error:`, error);
+      showToast(`Failed to ${isEditing ? "update" : "add"} news`, "e");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-              <div className="mb-4">
-                <TalukaDropdown
-                  mode={mode}
-                  {...register("talukaID", { required: "Taluka is required" })}
-                  errors={errors}
-                  register={register}
-                />
-                {errors.talukaID && (
-                  <p className="text-red-500 text-xs italic">
-                    {errors.talukaID.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="mb-4 flex items-center">
-                <input
-                  type="checkbox"
-                  {...register("isActive")}
-                  className="mr-2 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                  disabled={mode === "view"}
-                />
-                <label className="block text-gray-700 font-semibold">
-                  Active
-                </label>
-              </div>
-
-              {mode !== "view" && (
-                <div className="flex justify-center space-x-4">
-                  <button type="submit" className="btn btn-primary w-1/2">
-                    {mode === "add" ? "Add News" : "Update News"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => window.history.back()}
-                    className="btn btn-secondary w-1/2"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-            </div>
-          </form>
-        )}
-
-        {mode === "view" && initialData && (
-          <div className="card shadow-lg p-6 rounded-lg bg-gray-100">
-            <div className="mb-6">
-              <Image
-                src={initialData.image}
-                alt={initialData.title}
-                width={500}
-                height={300}
-                className="w-full h-64 object-cover rounded"
+  return loading ? (
+    <Loading />
+  ) : (
+    <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+      <h1 className="text-2xl font-semibold mb-4">
+        {news == undefined ? "Add" : "Update"} News
+      </h1>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Title
+          </label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Description
+          </label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="city"
+            className="block text-sm font-medium text-gray-700"
+          >
+            City
+          </label>
+          <select
+            id="taluka"
+            value={selectedTaluka}
+            onChange={(e) => setSelectedTaluka(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          >
+            {talukas.map((taluka) => (
+              <option key={taluka.id} value={taluka.id}>
+                {taluka.talukaName}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="image"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Image
+          </label>
+          <input
+            type="file"
+            id="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            ref={fileInputRef}
+            className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-gray-300 file:rounded-md file:text-sm file:font-medium file:bg-gray-50 hover:file:bg-gray-100"
+          />
+          {imagePreview && (
+            <div className="relative mt-4 w-full h-48">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="object-cover w-full h-full rounded-md shadow-md"
               />
-            </div>
-            <div className="mb-4">
-              <p className="font-bold text-lg">Title:</p>
-              <p>{initialData.title}</p>
-            </div>
-            <div className="mb-4">
-              <p className="font-bold text-lg">Description:</p>
-              <p>{initialData.description}</p>
-            </div>
-            <div className="mb-4">
-              <p className="font-bold text-lg">Likes:</p>
-              <p>{initialData.likes}</p>
-            </div>
-            <div className="mb-4">
-              <p className="font-bold text-lg">Dislikes:</p>
-              <p>{initialData.dislikes}</p>
-            </div>
-            <div className="mb-4">
-              <p className="font-bold text-lg">Views:</p>
-              <p>{initialData.views}</p>
-            </div>
-            <div className="mb-4">
-              <p className="font-bold text-lg">Shares:</p>
-              <p>{initialData.shares}</p>
-            </div>
-            <div className="mb-4">
-              <p className="font-bold text-lg">Status:</p>
-              <p
-                className={`font-semibold ${
-                  initialData.isActive ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {initialData.isActive ? "Active" : "Inactive"}
-              </p>
-            </div>
-            <div className="flex justify-center">
               <button
-                onClick={() => window.history.back()}
-                className="btn btn-primary"
+                type="button"
+                onClick={handleRemoveImage}
+                className="absolute top-2 right-2 bg-white text-gray-800 rounded-full p-1 shadow-lg border border-gray-300 hover:bg-gray-100 transition duration-200"
               >
-                Edit
+                <span className="sr-only">Remove image</span>
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
               </button>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="btn btn-primary px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Save
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

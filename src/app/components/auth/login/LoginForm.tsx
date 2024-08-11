@@ -77,7 +77,6 @@ const LoginForm = ({ type }: LoginType) => {
       // event.preventDefault();
       setLoading(true);
       const { email, password } = event;
-      console.log("password: ", password);
 
       switch (type) {
         case "login":

@@ -1,0 +1,10 @@
+.page-transition-wrapper {
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.page-transition-wrapper.animate {
+  opacity: 1;
+  transform: translateX(0);
+}

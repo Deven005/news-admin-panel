@@ -1,15 +1,20 @@
 "use client";
 import InputField from "@/app/components/InputField";
 import InputTextAreaField from "@/app/components/InputTextAreaField";
-import MyNavBar from "@/app/components/MyNavBar";
 import { HistoricalPlace } from "@/app/store/models/historical-places/historicalPlacesModel";
-import { doApiCall } from "@/app/Utils/Utils";
+import { doApiCall, showToast } from "@/app/Utils/Utils";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import Loading from "../../Loading";
+import GoogleMapComponent from "../../google-map/GoogleMapComponent";
+
+const validateSchema = Yup.object({
+  placeName: Yup.string().required("This field is required").min(5),
+  placeDescription: Yup.string().required("This field is required").min(5),
+}).required();
 
 type PropsType = {
   isEdit?: boolean;
@@ -19,20 +24,19 @@ type PropsType = {
 type PlaceFormData = {
   placeName: string;
   placeDescription: string;
+  placeLatitude: string;
+  placeLongitude: string;
 };
-
-const validateSchema = Yup.object()
-  .shape({
-    placeName: Yup.string().required("This field is required").min(5),
-    placeDescription: Yup.string().required("This field is required").min(5),
-  })
-  .required();
 
 const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
+  const [latitude, setLatitude] = useState(place?.placeLatitude || "37.7749");
+  const [longitude, setLongitude] = useState(
+    place?.placeLongitude || "-122.4194"
+  );
 
   const {
     register,
@@ -43,6 +47,16 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
     resolver: yupResolver(validateSchema),
   });
   const router = useRouter();
+
+  useEffect(() => {
+    if (isEdit && place) {
+      setValue("placeName", place.placeName);
+      setValue("placeDescription", place.placeDescription);
+      setLatitude(place.placeLatitude);
+      setLongitude(place.placeLongitude);
+    }
+  }, [isEdit, place, setValue]);
+
   const handleCreateUpdatePlace = async (event: PlaceFormData) => {
     try {
       setIsLoading(true);
@@ -51,190 +65,248 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
       const formData = new FormData();
       formData.append("placeName", placeName);
       formData.append("placeDescription", placeDescription);
-      selectedImages.forEach((image) => {
-        formData.append("files", image);
-      });
-      selectedVideos.forEach((video) => {
-        formData.append("files", video);
-      });
+      formData.append("placeLatitude", latitude.toString());
+      formData.append("placeLongitude", longitude.toString());
+
+      selectedImages.forEach((image) => formData.append("files", image));
+      selectedVideos.forEach((video) => formData.append("files", video));
 
       const res = await doApiCall({
-        url: "/admin/historical-places",
-        callType: "",
+        url: `/admin/historical-places/${place?.placeID ?? ""}`,
+        callType: isEdit ? "p" : "",
         formData: formData,
       });
-      console.log("res: ", res);
+
       if (res.ok) {
-        setIsLoading(false);
+        showToast(`Historical place is ${isEdit ? "Updated" : "Added"}`, "s");
         router.back();
       } else {
-        console.log("Something is wrong add new place: try block");
+        console.error("Something went wrong: ", res);
+        showToast(
+          `Something is wrong while ${
+            isEdit ? "Updating" : "Adding"
+          } Historical place`,
+          "s"
+        );
       }
     } catch (error) {
-      console.log("create place err: ", error);
+      console.error("Error creating or updating place:", error);
+      showToast(`Historical place is not ${isEdit ? "Updated" : "Added"}`, "e");
+    } finally {
       setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isEdit) {
-      setValue("placeName", place?.placeName ?? "");
-      setValue("placeDescription", place?.placeDescription ?? "");
-    }
-  }, []);
-
-  const handlePlaceImagesChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = event.target.files;
-    setSelectedImages([]);
-    setImagePreviews([]);
-    if (files) {
-      const newImages: File[] = Array.from(files);
-      setSelectedImages([...selectedImages, ...newImages]);
-
-      // Generate image previews
-      const newPreviews: string[] = [];
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target && e.target.result) {
-            newPreviews.push(e.target.result as string);
-            setImagePreviews([...imagePreviews, ...newPreviews]);
-          }
-        };
-        reader.readAsDataURL(file);
-        return;
-      });
     }
   };
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    setSelectedVideos([]);
     if (files) {
-      const newVideos: File[] = Array.from(files);
-      setSelectedVideos([...selectedVideos, ...newVideos]);
-      return;
+      setSelectedVideos(Array.from(files));
+    }
+  };
+
+  const handlePlaceImagesChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    event.stopPropagation();
+    const files = event.target.files;
+    if (files) {
+      setSelectedImages(Array.from(files));
+      const previews = Array.from(files).map((file) =>
+        URL.createObjectURL(file)
+      );
+      setImagePreviews(previews);
+    }
+  };
+
+  const handleDeleteFile = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    index: number,
+    type: "image" | "video"
+  ) => {
+    e.stopPropagation();
+
+    if (type === "image") {
+      const updatedImages = selectedImages.filter((_, i) => i !== index);
+      setSelectedImages(updatedImages);
+      setImagePreviews(
+        updatedImages.map((image) => URL.createObjectURL(image))
+      );
+    } else if (type === "video") {
+      const updatedVideos = selectedVideos.filter((_, i) => i !== index);
+      setSelectedVideos(updatedVideos);
+    }
+
+    // Reset file input state if no files remain
+    if (selectedImages.length === 1 && type === "image") {
+      setSelectedImages([]);
+      setImagePreviews([]);
+    } else if (selectedVideos.length === 1 && type === "video") {
+      setSelectedVideos([]);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen justify-center items-center">
-      <MyNavBar />
-
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <div className="card h-5/6 w-5/6 bg-base-100 shadow-2xl shadow-blue-700 justify-center items-center text-center">
-          <div
-            className="card-body max-h-80 overflow-y-auto"
-            style={{ width: "inherit" }}
-          >
-            <div className="card-actions justify-end">
-              <button
-                className="btn btn-square btn-sm"
-                onClick={() => router.back()}
+    <>
+      <div className="flex flex-col items-center p-4 bg-gray-100 min-h-screen">
+        {isLoading ? (
+          <Loading />
+        ) : (
+          <div className="card w-full max-w-4xl bg-white shadow-lg rounded-lg">
+            <div className="card-body">
+              <h2 className="text-2xl font-semibold mb-4">
+                {isEdit ? "Update" : "Add"} Historical Place
+              </h2>
+              <form
+                onSubmit={handleSubmit((e) =>
+                  handleCreateUpdatePlace({
+                    placeName: e.placeName,
+                    placeDescription: e.placeDescription,
+                    placeLatitude: "",
+                    placeLongitude: "",
+                  })
+                )}
+                className="space-y-4"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-            <h2 className="card-title">
-              {isEdit == false ? "Add" : "Update"} Historical place
-            </h2>
-            <p>{errors.root?.message}</p>
-            <form onSubmit={handleSubmit(handleCreateUpdatePlace)}>
-              <InputField
-                register={register("placeName")}
-                type={"text"}
-                label={"Place name"}
-                placeholder={"Enter place name"}
-              />
-              <p>{errors.placeName?.message}</p>
-              <InputTextAreaField
-                  register={register("placeDescription")}
-                  type={"text"}
-                  label={"Place Description"}
-                  placeholder={"Enter place description"} rows={0}              />
-              <p>{errors.placeDescription?.message}</p>
-              <label className="form-control w-full max-w-xl">
-                <div className="label">
-                  <span className="label-text">Place images gallery</span>
-                </div>
-                <input
-                  type="file"
-                  placeholder="Select place images gallery"
-                  required={true}
-                  onChange={handlePlaceImagesChange}
-                  multiple
-                  accept="image/*"
+                <InputField
+                  name="placeName"
+                  register={register("placeName")}
+                  type="text"
+                  label="Place Name"
+                  placeholder="Enter place name"
                 />
-              </label>
-
-              {imagePreviews.length > 0 && (
-                <>
-                  <p className="text-start pt-3">
-                    Place images gallery Preview
+                {errors.placeName && (
+                  <p className="text-red-500 text-sm">
+                    {errors.placeName.message}
                   </p>
-                  <div className="grid grid-cols-4 gap-4">
-                    {imagePreviews.map((img, index) => {
-                      return (
-                        <div key={index} className="avatar pt-5">
-                          <div className="w-14 rounded-xl">
-                            <img src={img} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-              <InputField
-                type="file"
-                label="Please select videos"
-                placeholder="Select videos"
-                onChange={handleVideoChange}
-                accept="video/*"
-              />
-              <div className="mt-4">
-                <p>Video Previews:</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedVideos.map((video, index) => (
-                    <div key={index} className="relative">
-                      <video controls className="max-w-xs max-h-40">
-                        <source
-                          src={URL.createObjectURL(video)}
-                          type="video/mp4"
-                        />
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
-                  ))}
+                )}
+
+                <InputTextAreaField
+                  name="placeDescription"
+                  register={register("placeDescription")}
+                  label="Place Description"
+                  placeholder="Enter place description"
+                  rows={4}
+                />
+                {errors.placeDescription && (
+                  <p className="text-red-500 text-sm">
+                    {errors.placeDescription.message}
+                  </p>
+                )}
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Place Images Gallery</span>
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handlePlaceImagesChange}
+                    className="file-input"
+                  />
                 </div>
-              </div>
-              <div className="card-actions justify-end">
-                <button className="btn btn-primary" type="submit">
-                  {!isEdit ? "Add" : "Update"} Place
-                </button>
-              </div>
-            </form>
+
+                {imagePreviews.length > 0 && (
+                  <div className="p-4 bg-white rounded-lg shadow-lg">
+                    <p className="text-2xl font-bold mb-4 text-gray-900">
+                      Place Images Gallery Preview:
+                    </p>
+                    <div className="grid grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                      {imagePreviews.map((img, index) => (
+                        <div
+                          key={index}
+                          className="relative w-32 h-32 overflow-hidden rounded-lg shadow-md border border-gray-200"
+                        >
+                          <img
+                            src={img}
+                            alt={`preview-${index}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 shadow-md hover:bg-red-700 transition-colors"
+                            onClick={(e) => handleDeleteFile(e, index, "image")}
+                            aria-label="Delete image"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Place Videos</span>
+                  </label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="video/*"
+                    onChange={handleVideoChange}
+                    className="file-input"
+                  />
+                </div>
+
+                {selectedVideos.length > 0 && (
+                  <div className="mt-8 p-4 bg-white rounded-lg shadow-lg">
+                    <p className="text-2xl font-bold mb-4 text-gray-900">
+                      Video Previews:
+                    </p>
+                    <div className="grid grid-cols-2 gap-6 max-h-96 overflow-y-auto">
+                      {selectedVideos.map((video, index) => (
+                        <div
+                          key={index}
+                          className="relative flex items-center justify-center w-full h-40"
+                        >
+                          <video
+                            controls
+                            className="w-full h-full object-cover rounded-lg shadow-lg transition-transform transform hover:scale-105"
+                          >
+                            <source
+                              src={URL.createObjectURL(video)}
+                              type="video/mp4"
+                            />
+                            Your browser does not support the video tag.
+                          </video>
+                          <button
+                            type="button"
+                            className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 shadow-md hover:bg-red-700 transition-colors"
+                            onClick={(e) => handleDeleteFile(e, index, "video")}
+                            aria-label="Delete video"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-4">
+                  <GoogleMapComponent
+                    draggable={isEdit || place == null ? true : false}
+                    onLocationSelect={({ lat, lng }) => {
+                      setLatitude(lat.toString());
+                      setLongitude(lng.toString());
+                    }}
+                    initialLatitude={parseFloat(latitude.toString())}
+                    initialLongitude={parseFloat(longitude.toString())}
+                  />
+                </div>
+
+                <div className="flex justify-end mt-6">
+                  <button type="submit" className="btn btn-primary">
+                    {isEdit ? "Update" : "Add"} Place
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
 

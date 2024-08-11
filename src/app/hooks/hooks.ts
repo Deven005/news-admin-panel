@@ -4,6 +4,7 @@ import { CategoriesModel } from "../store/models/categoriesModel";
 import { ReporterModel } from "../store/models/reporter/reporterModel";
 import { HistoricalPlaceModel } from "../store/models/historical-places/historicalPlacesModel";
 import { NewsTypeModel } from "../store/models/news/NewsModel";
+import { TalukaModel } from "../store/models/taluka/talukaModel";
 
 const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
   createTypedHooks<{
@@ -12,6 +13,7 @@ const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
     reporter: ReporterModel;
     historicalPlace: HistoricalPlaceModel;
     news: NewsTypeModel;
+    taluka: TalukaModel;
   }>();
 
 export { useStoreActions, useStoreState, useStoreDispatch, useStore };

@@ -1,39 +1,54 @@
 "use client";
+import InputField from "@/app/components/InputField";
 import Loading from "@/app/components/Loading";
-import MyNavBar from "@/app/components/MyNavBar";
-import { firestore } from "@/app/firebase/config";
 import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { NewsType } from "@/app/store/models/news/NewsModel";
-import { doApiCall, newsCollectionName } from "@/app/Utils/Utils";
-import { query, collection, onSnapshot } from "firebase/firestore";
+import { doApiCall, showToast } from "@/app/Utils/Utils";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const NewsView = () => {
-  // const { news, loading } = useNews();
   const pathname = usePathname();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const news = useStoreState((state) => state.news.news);
-  const changeNews = useStoreActions((state) => state.news.changeNews);
+  const { news, loading } = useStoreState((state) => state.news);
+  const talukas = useStoreState((state) => state.taluka.talukas);
+  const { changeNews, setLoading } = useStoreActions((state) => state.news);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTaluka, setSelectedTaluka] = useState("all");
+  const [filteredNews, setFilteredNews] = useState<NewsType[]>([]);
 
   useEffect(() => {
-    const q = query(collection(firestore, newsCollectionName));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const placesData = change.doc.data();
-        console.log(`placesData: `, placesData);
-        changeNews({
-          docID: change.doc.id,
-          type: change.type,
-          placesData: placesData,
-        });
-      });
-      setLoading(false);
-    });
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await changeNews();
+      } catch (err) {
+        console.log("Failed to load news.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => unsubscribe();
-  }, []);
+    loadData();
+  }, [changeNews]);
+
+  useEffect(() => {
+    let filtered = news;
+
+    if (selectedTaluka !== "all") {
+      filtered = filtered.filter((item) => item.talukaID === selectedTaluka);
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter((item) =>
+        item.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredNews(filtered);
+  }, [news, searchTerm, selectedTaluka]);
 
   const handleEditNewsClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -43,9 +58,8 @@ const NewsView = () => {
     router.push(`${pathname}/update/${news.id}`);
   };
 
-  const viewNewsHandler = (news: NewsType) => {
+  const viewNewsHandler = (news: NewsType) =>
     router.push(`${pathname}/${news.id}`);
-  };
 
   const handleDeleteNewsClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -53,131 +67,134 @@ const NewsView = () => {
   ) => {
     e.stopPropagation();
     try {
+      setLoading(true);
       await doApiCall({
         url: `/reporter/news/${news.id}`,
         callType: "d",
         formData: new FormData(),
       });
+      setLoading(false);
+      showToast(`Deleted!`, "s");
     } catch (error) {
+      setLoading(false);
       console.log("news delete err");
+      showToast(`Not Deleted!`, "s");
     }
   };
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <>
-      <MyNavBar />
-      {loading ? (
-        <Loading />
-      ) : (
-        <>
-          <button
-            onClick={() => router.push(`${pathname}/create`)}
-            className="btn btn-primary"
+      <div className="flex justify-between items-center mb-4 px-7">
+        <button
+          onClick={() => router.push(`${pathname}/create`)}
+          className="btn btn-primary"
+        >
+          Add New News
+        </button>
+
+        <div className="flex space-x-4">
+          <input
+            type="text"
+            placeholder="Search by title..."
+            className="input input-bordered"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="flex space-x-4">
+          <select
+            value={selectedTaluka}
+            onChange={(e) => setSelectedTaluka(e.target.value)}
+            className="select select-bordered"
           >
-            Add New News
-          </button>
-          <div className="p-4">
-            <div className="overflow-x-auto">
-              <table className="w-full border-separate border-spacing-4">
-                <thead className="bg-blue-600 text-white">
-                  <tr>
-                    <th className="p-3 text-center">Image</th>
-                    <th className="p-3 text-center">Title</th>
-                    <th className="p-3 text-center">Description</th>
-                    <th className="p-3 text-center">Likes</th>
-                    <th className="p-3 text-center">Dislikes</th>
-                    <th className="p-3 text-center">Views</th>
-                    <th className="p-3 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {news.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className="transition-transform transform hover:scale-105 hover:shadow-lg"
-                      style={{
-                        animation: `slideIn ${index * 0.1 + 0.3}s ease-out`,
-                      }}
-                      onClick={() => viewNewsHandler(item)}
-                    >
-                      <td colSpan={7} className="p-4">
-                        <div className="p-4 bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-24 h-24 relative overflow-hidden rounded-lg shadow-sm">
-                              <img
-                                src={item.image}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <h2 className="text-lg font-semibold mb-2">
-                                {item.title}
-                              </h2>
-                              <p className="text-gray-600 line-clamp-4">
-                                {item.description}
-                              </p>
-                              <div className="mt-2 flex items-center space-x-4">
-                                <div className="text-sm text-gray-700">
-                                  <span className="font-semibold">Likes:</span>{" "}
-                                  {item.likes}
-                                </div>
-                                <div className="text-sm text-gray-700">
-                                  <span className="font-semibold">
-                                    Dislikes:
-                                  </span>{" "}
-                                  {item.dislikes}
-                                </div>
-                                <div className="text-sm text-gray-700">
-                                  <span className="font-semibold">Views:</span>{" "}
-                                  {item.views}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex flex-col space-y-2">
-                              <button
-                                className="btn btn-sm btn-primary"
-                                onClick={(e) => handleEditNewsClick(e, item)}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                className="btn btn-sm btn-error"
-                                onClick={(e) => handleDeleteNewsClick(e, item)}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <option value="all">All Talukas</option>
+            {talukas.map((taluka) => (
+              <option key={taluka.id} value={taluka.id}>
+                {taluka.talukaName}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {filteredNews.length === 0 ? (
+        <div
+          className="flex items-center justify-center text-center"
+          style={{ height: "70vh" }}
+        >
+          <div className="p-6 bg-base-100 shadow-xl rounded">
+            <h2 className="text-xl font-bold">
+              No news found! You can add news.
+            </h2>
           </div>
-        </>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+          {filteredNews.map((item, index) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 hover:shadow-lg"
+              style={{
+                animation: `slideIn ${index * 0.1 + 0.3}s ease-out`,
+              }}
+              onClick={() => viewNewsHandler(item)}
+            >
+              <div className="relative overflow-hidden rounded-lg shadow-sm mb-4">
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-48 object-cover"
+                  height={200}
+                  width={200}
+                  priority={true}
+                />
+              </div>
+              <h2 className="text-lg font-semibold mb-2">{item.title}</h2>
+              <p className="text-gray-600 line-clamp-3 mb-4">
+                {item.description}
+              </p>
+              <div className="text-sm text-gray-700 mb-4">
+                <span className="font-semibold">Likes:</span> {item.likes} |{" "}
+                <span className="font-semibold">Dislikes:</span> {item.dislikes}{" "}
+                | <span className="font-semibold">Views:</span> {item.views}
+              </div>
+              <div className="text-sm text-gray-700 mb-4">
+                <span className="font-semibold">Created At:</span>{" "}
+                {new Date(
+                  item.timestampCreatedAt.seconds * 1000 +
+                    item.timestampCreatedAt.nanoseconds / 1e6
+                ).toLocaleString("en-US")}
+              </div>
+              <div className="text-sm text-gray-700 mb-4">
+                <span className="font-semibold">Updated At:</span>{" "}
+                {new Date(
+                  item.timestampUpdatedAt.seconds * 1000 +
+                    item.timestampUpdatedAt.nanoseconds / 1e6
+                ).toLocaleString("en-US")}
+              </div>
+              <div className="flex justify-between">
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={(e) => handleEditNewsClick(e, item)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-sm btn-error"
+                  onClick={(e) => handleDeleteNewsClick(e, item)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </>
   );
 };
 
-// export interface News {
-//   id: string;
-//   title: string;
-//   description: string;
-//   image: string;
-//   imagePath: string;
-//   talukaID: string;
-//   isActive: boolean;
-//   likes: number;
-//   dislikes: number;
-//   views: number;
-//   shares: number;
-//   timestampCreatedAt: Date;
-//   timestampUpdatedAt: Date;
-//   likedByUsers: string[];
-//   disLikedByUsers: string[];
-// }
 export default NewsView;

@@ -1,6 +1,13 @@
-import { action, Action } from "easy-peasy";
+import { firestore } from "@/app/firebase/config";
+import { doApiCall, historicalPlaceCollectionName } from "@/app/Utils/Utils";
+import { action, Action, thunk, Thunk } from "easy-peasy";
 import firebase from "firebase/compat/app";
-import { DocumentChangeType, DocumentData } from "firebase/firestore";
+import {
+  collection,
+  DocumentChangeType,
+  DocumentData,
+  onSnapshot,
+} from "firebase/firestore";
 
 interface FileType {
   downloadUrl: string;
@@ -16,6 +23,9 @@ interface HistoricalPlace {
   placeCreatedAt: firebase.firestore.Timestamp;
   placeUpdatedAt: firebase.firestore.Timestamp;
   placeShow: boolean;
+  isActive: boolean;
+  placeLatitude: number;
+  placeLongitude: number;
 }
 
 interface ChangeInHistoricalPlacesType {
@@ -26,53 +36,58 @@ interface ChangeInHistoricalPlacesType {
 
 interface HistoricalPlaceModel {
   historicalPlaces: HistoricalPlace[];
-
-  changeInPlace: Action<HistoricalPlaceModel, ChangeInHistoricalPlacesType>;
+  listenPlaceChange: Thunk<HistoricalPlaceModel>;
+  deleteHistoricalPlace: Thunk<HistoricalPlaceModel, string>;
+  isLoading: boolean;
+  setLoading: Action<HistoricalPlaceModel, boolean>;
 }
 
 const historicalPlaceModel: HistoricalPlaceModel = {
   historicalPlaces: [],
-  changeInPlace: action((state, payload) => {
-    const { type, docID, placesData } = payload;
-    var changedPlaceIndex: number = state.historicalPlaces.findIndex(
-      (val) => val.placeID == docID
-    );
+  deleteHistoricalPlace: thunk(async (actions, id) => {
+    console.log("delete place ID: ", id);
 
-    switch (type) {
-      case "added":
-        if (changedPlaceIndex == -1) {
-          state.historicalPlaces.push({
-            placeID: docID,
-            placeCreatedAt: placesData["placeCreatedAt"],
-            placeDescription: placesData["placeDescription"],
-            images: placesData["images"],
-            videos: placesData["videos"],
-            placeName: placesData["placeName"],
-            placeShow: placesData["placeShow"],
-            placeUpdatedAt: placesData["placeUpdatedAt"],
-          });
-        }
-        break;
-      case "modified":
-        if (changedPlaceIndex !== -1) {
-          state.historicalPlaces[changedPlaceIndex] = {
-            placeID: docID,
-            placeCreatedAt: placesData["placeCreatedAt"],
-            placeDescription: placesData["placeDescription"],
-            images: placesData["images"],
-            videos: placesData["videos"],
-            placeName: placesData["placeName"],
-            placeShow: placesData["placeShow"],
-            placeUpdatedAt: placesData["placeUpdatedAt"],
-          };
-        }
-        break;
-      case "removed":
-        if (changedPlaceIndex !== -1) {
-          state.historicalPlaces.splice(changedPlaceIndex, 1);
-        }
-        break;
+    try {
+      actions.setLoading(true);
+      const response = await doApiCall({
+        url: `/admin/historical-places/${id}`,
+        callType: "d",
+        formData: new FormData(),
+      });
+      console.log("place delete res: ", response);
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      actions.setLoading(false);
     }
+  }),
+  listenPlaceChange: thunk(async (actions, _, { getState }) => {
+    try {
+      actions.setLoading(true);
+      const unsubscribe = onSnapshot(
+        collection(firestore, historicalPlaceCollectionName),
+        (snapshot) => {
+          actions.setLoading(true);
+          getState().historicalPlaces = [
+            ...(snapshot.docs.map((doc) => ({
+              placeID: doc.id,
+              ...doc.data(),
+            })) as HistoricalPlace[]),
+          ];
+          actions.setLoading(false);
+        }
+      );
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error fetching Talukas:", error);
+    }
+  }),
+  isLoading: false,
+  setLoading: action((state, payload) => {
+    state.isLoading = payload;
   }),
 };
 

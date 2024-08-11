@@ -1,5 +1,5 @@
 import { Reporter } from "@/app/store/models/reporter/reporterModel";
-import { doApiCall } from "@/app/Utils/Utils";
+import { doApiCall, showToast } from "@/app/Utils/Utils";
 import { yupResolver } from "@hookform/resolvers/yup";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -98,10 +98,15 @@ function AddUpdateReporterForm({
         `${isEditReporter ? "Update" : "Add"} reporter response: `,
         response
       );
+      showToast(`${isEditReporter ? "Update" : "Add"} reporter is done!`, "s");
       onModalCancelHandler();
     } catch (error) {
       console.log("add reporter error: ", error);
       setIsLoading(false);
+      showToast(
+        `${isEditReporter ? "Update" : "Add"} reporter is not done!`,
+        "e"
+      );
     }
   };
 

@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import * as Yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { doApiCall } from "@/app/Utils/Utils";
+import { doApiCall, showToast } from "@/app/Utils/Utils";
 import { Category } from "@/app/store/models/categoriesModel";
 
 const validateSchema = Yup.object()
@@ -95,10 +95,12 @@ function AddCategoryForm({
 
       onModalCancelHandler();
       // alert(`Category ${!isEditCategory ? "added" : "updated"} successfully!`);
+      showToast(`Category ${!isEditCategory ? "added" : "updated"}`, "s");
     } catch (error) {
       setIsLoading(false);
       console.error("Error adding category:", error);
       alert("Failed to add category");
+      showToast(`Category ${!isEditCategory ? "added" : "updated"}`, "e");
     }
   };
 
