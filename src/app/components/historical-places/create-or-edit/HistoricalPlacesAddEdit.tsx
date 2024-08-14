@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import Loading from "../../Loading";
 import GoogleMapComponent from "../../google-map/GoogleMapComponent";
+import Image from "next/image";
 
 const validateSchema = Yup.object({
   placeName: Yup.string().required("This field is required").min(5),
@@ -33,9 +34,11 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
-  const [latitude, setLatitude] = useState(place?.placeLatitude || "37.7749");
-  const [longitude, setLongitude] = useState(
-    place?.placeLongitude || "-122.4194"
+  const [latitude, setLatitude] = useState<number>(
+    place?.placeLatitude || 37.7749
+  );
+  const [longitude, setLongitude] = useState<number>(
+    place?.placeLongitude || -122.4194
   );
 
   const {
@@ -217,11 +220,14 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
                           key={index}
                           className="relative w-32 h-32 overflow-hidden rounded-lg shadow-md border border-gray-200"
                         >
-                          <img
+                          <Image
                             src={img}
                             alt={`preview-${index}`}
-                            className="w-full h-full object-cover"
+                            className="w-20 h-20 object-contain rounded text-center"
+                            height={100}
+                            width={100}
                           />
+
                           <button
                             type="button"
                             className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 shadow-md hover:bg-red-700 transition-colors"
@@ -288,11 +294,11 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
                   <GoogleMapComponent
                     draggable={isEdit || place == null ? true : false}
                     onLocationSelect={({ lat, lng }) => {
-                      setLatitude(lat.toString());
-                      setLongitude(lng.toString());
+                      setLatitude(lat);
+                      setLongitude(lng);
                     }}
-                    initialLatitude={parseFloat(latitude.toString())}
-                    initialLongitude={parseFloat(longitude.toString())}
+                    initialLatitude={place?.placeLatitude ?? latitude}
+                    initialLongitude={place?.placeLongitude ?? longitude}
                   />
                 </div>
 

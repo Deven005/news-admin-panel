@@ -7,6 +7,7 @@ import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { Category } from "@/app/store/models/categoriesModel";
 import { doApiCall, showToast } from "@/app/Utils/Utils";
 import { collection, onSnapshot } from "firebase/firestore";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const Business = () => {
@@ -235,7 +236,13 @@ const Business = () => {
                       <td>
                         <div className="avatar">
                           <div className="w-14 rounded-xl">
-                            <img src={cat.categoryIconImage} />
+                            <Image
+                              src={cat.categoryIconImage}
+                              alt={cat.categoryName}
+                              className="w-20 h-20 object-fill rounded"
+                              height={100}
+                              width={100}
+                            />
                           </div>
                         </div>
                       </td>

@@ -157,11 +157,16 @@ const PlaceDetailsPage: React.FC = () => {
                   setSelectedMedia({ type: "image", url: image.downloadUrl })
                 }
               >
-                <img
-                  src={image.downloadUrl}
-                  alt={`Image ${index + 1}`}
-                  className="w-full h-32 object-cover rounded-lg shadow-md"
-                />
+                <div className="relative w-full h-32">
+                  <Image
+                    src={image.downloadUrl}
+                    alt={`Image ${index + 1}`}
+                    className="rounded-lg shadow-md"
+                    layout="fill"
+                    objectFit="cover"
+                    priority={true}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -222,10 +227,15 @@ const PlaceDetailsPage: React.FC = () => {
               ✕
             </button>
             {selectedMedia.type === "image" ? (
-              <img
+              <Image
                 src={selectedMedia.url}
                 alt="Selected media"
                 className="w-full h-auto max-h-[80vh] max-w-[80vw] object-contain"
+                height={100}
+                width={100}
+                priority={true}
+                objectFit="cover"
+                layout="responsive"
               />
             ) : (
               <video

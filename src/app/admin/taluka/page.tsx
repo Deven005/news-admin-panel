@@ -85,9 +85,10 @@ const Taluka = () => {
                     <Image
                       src={taluka.talukaIconImage}
                       alt={taluka.talukaName}
-                      className="w-16 h-16 object-cover rounded"
+                      className="w-16 h-16 object-fill rounded"
                       height={100}
                       width={100}
+                      priority={true}
                     />
                   </td>
                   <td>{taluka.talukaName}</td>

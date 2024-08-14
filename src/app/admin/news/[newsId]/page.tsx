@@ -3,6 +3,7 @@ import Loading from "@/app/components/Loading";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { useStoreState } from "@/app/hooks/hooks";
+import Image from "next/image";
 
 const EditNewsView = () => {
   const newsId = usePathname().split("/").pop();
@@ -10,7 +11,7 @@ const EditNewsView = () => {
   const newsItem = news.find((p) => p.id === newsId)!;
 
   const talukas = useStoreState((state) => state.taluka.talukas);
-  const [selectedTaluka, setSelectedTaluka] = useState<string>(talukas[0].id);
+  const [selectedTaluka, setSelectedTaluka] = useState<string>(talukas[0]?.id);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const handleCityChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -33,25 +34,30 @@ const EditNewsView = () => {
         <h1 className="text-3xl font-bold mb-4 text-gray-800">
           {newsItem.title}
         </h1>
-        <img
-          src={newsItem.image}
-          alt={newsItem.id}
-          className="w-full h-64 object-cover rounded-lg mb-4 cursor-pointer"
-          onClick={handleImageClick}
-        />
+        <div className="relative w-full h-64">
+          <Image
+            src={newsItem.image}
+            alt={newsItem.id}
+            className="rounded-lg mb-4 cursor-pointer"
+            onClick={handleImageClick}
+            layout="fill"
+            objectFit="contain"
+            priority={true}
+          />
+        </div>
         <div className="overflow-hidden">
           <p className="text-gray-700 mb-4 overflow-auto max-h-40">
             {newsItem.description}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
+          <div className="col-span-2 sm:col-span-1">
             <strong>Image Path:</strong> {newsItem.imagePath}
           </div>
-          <div>
-            Taluka:
-            <div className="flex justify-between items-center text-gray-600">
-              <div className="relative">
+          <div className="col-span-2 sm:col-span-1">
+            <strong>Taluka:</strong>
+            <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center text-gray-600">
+              <div className="relative mt-2 sm:mt-0">
                 <select
                   aria-label="Select Taluka for news"
                   value={selectedTaluka}
@@ -112,10 +118,14 @@ const EditNewsView = () => {
           className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50"
           onClick={handleFullScreenClose}
         >
-          <img
+          <Image
             src={newsItem.image}
             alt={newsItem.id}
             className="w-full h-auto max-h-full object-contain rounded-lg"
+            layout="intrinsic"
+            width={800}
+            height={600}
+            priority={true}
           />
           <button
             className="absolute top-4 right-4 text-white text-3xl"

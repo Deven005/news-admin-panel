@@ -5,6 +5,7 @@ import { useStoreActions, useStoreState } from "./hooks/hooks";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ReporterDashboard from "./components/reporter/ReporterDashboard";
 import Loading from "./components/Loading";
+import { auth } from "./firebase/config";
 
 export default function Home() {
   const isRehydrated = useStoreRehydrated();
@@ -15,6 +16,10 @@ export default function Home() {
   // const { listenToAuthChanges, setLoading } = useStoreActions(
   //   (state) => state.auth
   // );
+
+  useEffect(() => {
+    auth.currentUser?.reload();
+  }, []);
 
   return isRehydrated && !isLoading ? (
     <main className="">

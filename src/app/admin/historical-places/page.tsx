@@ -6,6 +6,7 @@ import Loading from "@/app/components/Loading";
 import { HistoricalPlace } from "@/app/store/models/historical-places/historicalPlacesModel";
 import { showToast } from "@/app/Utils/Utils";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 const HistoricalPlaces = () => {
   const router = useRouter();
@@ -75,7 +76,9 @@ const HistoricalPlaces = () => {
                   <td>
                     <div className="avatar">
                       <div className="w-14 rounded-xl overflow-hidden">
-                        <img
+                        <Image
+                          height={100}
+                          width={100}
                           src={
                             place.images && place.images.length > 0
                               ? place.images[0].downloadUrl
@@ -83,6 +86,7 @@ const HistoricalPlaces = () => {
                           }
                           alt={place.placeName}
                           className="object-cover w-full h-full"
+                          priority={true}
                         />
                       </div>
                     </div>

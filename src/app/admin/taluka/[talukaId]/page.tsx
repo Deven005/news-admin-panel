@@ -2,6 +2,7 @@
 import Loading from "@/app/components/Loading";
 import { useStoreState } from "@/app/hooks/hooks";
 import { formatDate, showToast } from "@/app/Utils/Utils";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
 const TalukaDetails = () => {
@@ -31,17 +32,19 @@ const TalukaDetails = () => {
         <h1 className="text-3xl font-bold text-gray-800">
           {taluka.talukaName}
         </h1>
-        <img
+        <Image
           src={taluka.talukaIconImage}
           alt={taluka.talukaName}
-          className="w-16 h-16 object-cover rounded-lg shadow"
+          className="w-20 h-20 object-fill rounded"
+          height={100}
+          width={100}
         />
       </div>
       <div className="space-y-4">
         <div className="flex items-center space-x-4">
           <strong className="text-gray-700">Created At:</strong>
           <span className="text-gray-600">
-            {formatDate(taluka.talukaCreatedAt)}
+            {formatDate(new Date(taluka.talukaCreatedAt))}
           </span>
           <button
             className="btn btn-sm btn-outline"
@@ -53,7 +56,7 @@ const TalukaDetails = () => {
         <div className="flex items-center space-x-4">
           <strong className="text-gray-700">Updated At:</strong>
           <span className="text-gray-600">
-            {formatDate(taluka.talukaUpdatedAt)}
+            {formatDate(new Date(taluka.talukaUpdatedAt))}
           </span>
           <button
             className="btn btn-sm btn-outline"

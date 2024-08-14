@@ -5,6 +5,7 @@ import { reporterModel } from "./models/reporter/reporterModel";
 import { historicalPlaceModel } from "./models/historical-places/historicalPlacesModel";
 import { newsModel } from "./models/news/NewsModel";
 import { talukaModel } from "./models/taluka/talukaModel";
+import { adminModel } from "./models/admin/adminModel";
 
 // export interface StoreModel {
 //   todos: string[];
@@ -20,6 +21,7 @@ export const store = createStore(
       historicalPlace: historicalPlaceModel,
       news: newsModel,
       taluka: talukaModel,
+      admin: adminModel,
       // todos: ["Create store", "Wrap application", "Use store"],
       // addTodo: action((state, payload) => {
       //   state.todos.push(payload);

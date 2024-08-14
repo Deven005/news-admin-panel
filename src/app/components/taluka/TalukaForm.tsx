@@ -1,6 +1,7 @@
 "use client";
 import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { Taluka } from "@/app/store/models/taluka/talukaModel";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import React from "react";
@@ -144,11 +145,15 @@ const TalukaForm = ({ taluka }: TalukaFormProps) => {
                 />
                 {(imagePreview || taluka?.talukaIconImage) && (
                   <div className="relative mt-4 w-full h-64 overflow-hidden rounded-lg shadow-md border border-gray-300">
-                    <img
-                      src={imagePreview || taluka?.talukaIconImage}
+                    <Image
+                      src={imagePreview || (taluka?.talukaIconImage ?? "")}
                       alt="Preview"
-                      className="object-cover w-full h-full"
+                      className="object-fill w-full h-full rounded"
+                      height={100}
+                      width={100}
+                      priority={true}
                     />
+
                     <button
                       type="button"
                       onClick={handleRemoveImage}

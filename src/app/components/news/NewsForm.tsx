@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { NewsType } from "@/app/store/models/news/NewsModel";
 import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
+import Image from "next/image";
 
 interface NewsFormProps {
   news?: NewsType;
@@ -161,10 +162,18 @@ const NewsForm = ({ news }: NewsFormProps) => {
           />
           {imagePreview && (
             <div className="relative mt-4 w-full h-48">
-              <img
+              {/* <Image
                 src={imagePreview}
                 alt="Preview"
                 className="object-cover w-full h-full rounded-md shadow-md"
+              /> */}
+              <Image
+                src={imagePreview}
+                alt={`preview-${0}`}
+                className="w-full h-full object-fill rounded-md shadow-md"
+                height={100}
+                width={100}
+                priority={true}
               />
               <button
                 type="button"

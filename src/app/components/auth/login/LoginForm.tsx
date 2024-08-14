@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import Loading from "../../Loading";
+import { showToast } from "@/app/Utils/Utils";
 
 type FormData = {
   email: string;
@@ -41,27 +42,28 @@ const validateSchema = Yup.object()
   })
   .required();
 
-type LoginType = {
-  type: string;
-};
-
-const LoginForm = ({ type }: LoginType) => {
+const LoginForm = () => {
   const [loading, setLoading] = useState(false);
-  const [showPass, setShowPass] = useState(false);
   // const [user, setUser] = useState<User | null>();
   const router = useRouter();
 
-  const user = useStoreState((state) => state.auth.user);
+  const { user, isAdmin, isAuthenticated, isReporter } = useStoreState(
+    (state) => state.auth
+  );
   const login = useStoreActions((state) => state.auth.login);
+  const updateAdmin = useStoreActions((state) => state.admin.updateAdmin);
 
-  // useEffect(() => {
-  //   console.log("User: ", user);
-  //   if (user) {
-  //     router.push("/");
-  //   } else {
-  //     router.push("/auth/login");
-  //   }
-  // }, [user]);
+  useEffect(() => {
+    const updateAdminSignInTime = async () => {
+      if (isAdmin && isAuthenticated) {
+        await updateAdmin({
+          userUid: user!.uid,
+          lastSignInTime: user?.metadata.lastSignInTime,
+        });
+      }
+    };
+    updateAdminSignInTime();
+  }, [isAdmin, isAuthenticated, isReporter]);
 
   const {
     register,
@@ -76,26 +78,17 @@ const LoginForm = ({ type }: LoginType) => {
     try {
       // event.preventDefault();
       setLoading(true);
+
       const { email, password } = event;
-
-      switch (type) {
-        case "login":
-          await login({ email, password });
-          break;
-
-        case "register":
-          break;
-
-        default:
-          console.log("Not supported type Login Form");
-          break;
-      }
+      await login({ email, password });
       setLoading(false);
+      showToast("Login Success!", "s");
+
       router.push("/");
     } catch (error) {
       setLoading(false);
-      setShowPass(true);
       console.log("login catch: ", error);
+      showToast("Login Error!", "e");
     }
   }
   // loading
@@ -196,43 +189,39 @@ const LoginForm = ({ type }: LoginType) => {
           </div>
         )}
 
-        {showPass && (
-          <>
-            <label className="form-control w-full max-w-xl">
-              <div className="label">
-                <span className="label-text">Password</span>
-              </div>
-              <input
-                type="password"
-                {...register("password")}
-                placeholder="Password"
-                required={true}
-                defaultValue={"123456"}
-                className="input input-bordered w-full max-w-xl"
-              />
-            </label>
+        <label className="form-control w-full max-w-xl">
+          <div className="label">
+            <span className="label-text">Password</span>
+          </div>
+          <input
+            type="password"
+            {...register("password")}
+            placeholder="Password"
+            required={true}
+            defaultValue={"123456"}
+            className="input input-bordered w-full max-w-xl"
+          />
+        </label>
 
-            {errors.password != undefined &&
-              errors.password.message != undefined && (
-                <div role="alert" className="alert alert-error">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-current shrink-0 h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <p>{errors.password?.message}</p>
-                </div>
-              )}
-          </>
-        )}
+        {errors.password != undefined &&
+          errors.password.message != undefined && (
+            <div role="alert" className="alert alert-error">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <p>{errors.password?.message}</p>
+            </div>
+          )}
 
         <div className="mb-6 flex items-center justify-between">
           <div className="mb-[0.125rem] block min-h-[1.5rem] pl-[1.5rem]">
@@ -259,16 +248,6 @@ const LoginForm = ({ type }: LoginType) => {
           >
             Login
           </button>
-
-          <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
-            Don't have an account?
-            <a
-              href="#!"
-              className="text-danger transition duration-150 ease-in-out hover:text-danger-600 focus:text-danger-600 active:text-danger-700"
-            >
-              Register
-            </a>
-          </p>
         </div>
       </form>
     </div>

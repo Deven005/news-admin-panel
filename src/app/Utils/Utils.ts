@@ -4,7 +4,7 @@ import { Timestamp } from "firebase/firestore";
 
 interface ApiCallInput {
   url: string;
-  formData: FormData;
+  formData?: FormData;
   callType: string;
 }
 
@@ -40,12 +40,14 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
     `Bearer ${await auth.currentUser?.getIdToken()}`
   );
 
+  // headers.append("Content-Type", "multipart/form-data");
+
   // "https://news-backend-45h4p5l4ua-el.a.run.app/api";
   // https://news-admin-panel-45h4p5l4ua-el.a.run.app/auth/login
 
   // http://localhost:8080/api
 
-  return fetch(`https://news-backend-45h4p5l4ua-el.a.run.app/api${url}`, {
+  return fetch(`http://localhost:8080/api${url}`, {
     method: methodType,
     body: formData,
     headers: headers,

@@ -1,30 +1,52 @@
+"use client";
 import React from "react";
 import LoginForm from "../../components/auth/login/LoginForm";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 const Login = () => {
   return (
     <div className="h-screen flex items-center justify-center">
-      <section className="">
-        <div className="card bg-transparent text-center shadow-xl">
-          <div className="card-body items-center text-center">
-            <div className="h-full">
-              <div className="g-6 flex h-full flex-wrap items-center justify-center lg:justify-between">
-                <div className="shrink-1 mb-12 grow-0 basis-auto md:mb-0 md:w-9/12 md:shrink-0 lg:w-6/12 xl:w-6/12">
-                  <img
-                    src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-                    className="w-full"
-                    alt="Sample image"
-                  />
-                </div>
+      <motion.section
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-4xl"
+      >
+        <div className="card bg-white/70 backdrop-blur-md shadow-2xl rounded-lg">
+          <div className="card-body flex flex-col md:flex-row items-center justify-center text-center p-6 space-y-6 md:space-y-0 md:space-x-6">
+            <motion.div
+              initial={{ x: -100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.7 }}
+              className="md:w-1/2"
+            >
+              <Image
+                src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+                alt="Sample image"
+                width={800}
+                height={533}
+                layout="responsive"
+                className="rounded-lg shadow-lg object-cover w-full"
+                priority={true}
+              />
+            </motion.div>
 
-                <div className="mb-12 md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12">
-                  <LoginForm type={"login"} />
-                </div>
-              </div>
-            </div>
+            <motion.div
+              initial={{ x: 100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.7 }}
+              className="w-full md:w-1/2"
+            >
+              <h2 className="text-3xl font-bold mb-4 text-gray-800">
+                Welcome Back
+              </h2>
+              <p className="text-gray-600 mb-4">Please login to your account</p>
+              <LoginForm />
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import {
   User,
 } from "firebase/auth";
 import { store } from "../../store";
+import { doApiCall } from "@/app/Utils/Utils";
 
 interface LoginInputModel {
   email: string;
@@ -51,6 +52,7 @@ const authModel: AuthModel = {
     try {
       const { email, password } = payload;
       const { user } = await signInWithEmailAndPassword(auth, email, password);
+      await user.reload();
       const { claims, token } = await user.getIdTokenResult();
       actions.loginSuccess({ claims, token, user });
     } catch (error) {

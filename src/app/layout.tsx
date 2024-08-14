@@ -24,7 +24,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="winter">
-      <head>{/* <Script src="http://localhost:8097"></Script> */}</head>
+      <head>
+        {/* <Script src="http://localhost:8097"></Script> */}
+        <link
+          rel="icon"
+          href="https://firebasestorage.googleapis.com/v0/b/mydhule-3635d.appspot.com/o/my_assets%2Ficon%2Fmy%20dhule%20appIcon.png?alt=media&token=2cac825d-2001-43e6-a8e8-9d5d0276d5a9"
+          about="web app icon"
+        />
+      </head>
       <body className={inter.className}>
         <PageTransition>
           <StoreProvider store={store}>
