@@ -10,13 +10,31 @@ const MyNavBar = () => {
     (state) => state.auth
   );
 
+  // Determine the links based on the user type
+  const getUserLinks = () => {
+    if (isAdmin) {
+      return [
+        { href: "/admin/taluka", label: "Taluka" },
+        { href: "/admin/content-management", label: "Content Management" },
+        { href: "/admin/business", label: "Business" },
+        // { href: "/admin/reporter", label: "Reporter" },
+        // { href: "/admin/historical-places", label: "Historical Places" },
+        // { href: "/admin/admin", label: "Admins" },
+        { href: "/admin/users", label: "User Management" },
+      ];
+    } else if (isReporter) {
+      return [{ href: "/reporter/news", label: "News" }];
+    }
+    return [];
+  };
+
+  const userLinks = getUserLinks();
+
   return isAuthenticated ? (
     <nav className="navbar bg-base-100 shadow-md">
-      {/* Navbar Start */}
       <div className="navbar-start">
         <div className="dropdown">
           <label tabIndex={0} className="btn btn-ghost lg:hidden">
-            {/* Hamburger Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -32,41 +50,15 @@ const MyNavBar = () => {
               />
             </svg>
           </label>
-          {/* Mobile Menu */}
           <ul
             tabIndex={0}
             className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
-            {isAdmin ? (
-              <>
-                <li>
-                  <Link href={"/admin/taluka"}>Taluka</Link>
-                </li>
-                <li>
-                  <Link href={"/admin/news"}>News</Link>
-                </li>
-                <li>
-                  <Link href={"/admin/business"}>Business</Link>
-                </li>
-                <li>
-                  <Link href={"/admin/reporter"}>Reporter</Link>
-                </li>
-                <li>
-                  <Link href={"/admin/historical-places"}>
-                    Historical Places
-                  </Link>
-                </li>
-                <li>
-                  <Link href={"/admin/admin"}>Admins</Link>
-                </li>
-              </>
-            ) : (
-              <>
-                <li>
-                  <Link href={"/reporter/news"}>News</Link>
-                </li>
-              </>
-            )}
+            {userLinks.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href}>{link.label}</Link>
+              </li>
+            ))}
           </ul>
         </div>
         <Link className="btn btn-ghost normal-case text-xl" href="/">
@@ -74,41 +66,16 @@ const MyNavBar = () => {
         </Link>
       </div>
 
-      {/* Navbar Center */}
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
-          {isAdmin ? (
-            <>
-              <li>
-                <Link href={"/admin/taluka"}>Taluka</Link>
-              </li>
-              <li>
-                <Link href={"/admin/news"}>News</Link>
-              </li>
-              <li>
-                <Link href={"/admin/business"}>Business</Link>
-              </li>
-              <li>
-                <Link href={"/admin/reporter"}>Reporter</Link>
-              </li>
-              <li>
-                <Link href={"/admin/historical-places"}>Historical Places</Link>
-              </li>
-              <li>
-                <Link href={"/admin/admin"}>Admins</Link>
-              </li>
-            </>
-          ) : (
-            <>
-              <li>
-                <Link href={"/reporter/news"}>News</Link>
-              </li>
-            </>
-          )}
+          {userLinks.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href}>{link.label}</Link>
+            </li>
+          ))}
         </ul>
       </div>
 
-      {/* Navbar End */}
       <div className="navbar-end">
         <div className="dropdown dropdown-end">
           <div

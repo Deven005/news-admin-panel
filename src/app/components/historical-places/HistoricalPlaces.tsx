@@ -5,7 +5,6 @@ import React, { useEffect } from "react";
 import Loading from "@/app/components/Loading";
 import { HistoricalPlace } from "@/app/store/models/historical-places/historicalPlacesModel";
 import { showToast } from "@/app/Utils/Utils";
-import { toast } from "react-toastify";
 import Image from "next/image";
 
 const HistoricalPlaces = () => {
@@ -24,7 +23,7 @@ const HistoricalPlaces = () => {
   }, [listenPlaceChange]);
 
   const handleEditPlaceClick = (place: HistoricalPlace) => {
-    router.push(`${pathname}/${place.placeID}`);
+    router.push(`${pathname}/historical-places/${place.placeID}`);
   };
 
   const handleDeletePlaceClick = async (
@@ -47,7 +46,7 @@ const HistoricalPlaces = () => {
     <>
       <button
         className="btn text-right mb-4"
-        onClick={() => router.push(`${pathname}/create`)}
+        onClick={() => router.push(`${pathname}/historical-places/create`)}
       >
         Add Place
       </button>

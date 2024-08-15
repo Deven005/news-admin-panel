@@ -1,5 +1,4 @@
 "use client";
-import InputField from "@/app/components/InputField";
 import Loading from "@/app/components/Loading";
 import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { NewsType } from "@/app/store/models/news/NewsModel";
@@ -8,7 +7,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const NewsView = () => {
+const News = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { news, loading } = useStoreState((state) => state.news);
@@ -55,11 +54,11 @@ const NewsView = () => {
     news: NewsType
   ) => {
     e.stopPropagation();
-    router.push(`${pathname}/update/${news.id}`);
+    router.push(`${pathname}/news/update/${news.id}`);
   };
 
   const viewNewsHandler = (news: NewsType) =>
-    router.push(`${pathname}/${news.id}`);
+    router.push(`${pathname}/news/${news.id}`);
 
   const handleDeleteNewsClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -88,7 +87,7 @@ const NewsView = () => {
     <>
       <div className="flex justify-between items-center mb-4 px-7">
         <button
-          onClick={() => router.push(`${pathname}/create`)}
+          onClick={() => router.push(`${pathname}/news/create`)}
           className="btn btn-primary"
         >
           Add New News
@@ -197,4 +196,4 @@ const NewsView = () => {
   );
 };
 
-export default NewsView;
+export default News;

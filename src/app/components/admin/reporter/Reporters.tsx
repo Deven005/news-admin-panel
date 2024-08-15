@@ -1,15 +1,13 @@
 "use client";
 import AddUpdateReporterForm from "@/app/components/admin/reporter/AddUpdateReporterForm";
-import MyNavBar from "@/app/components/MyNavBar";
 import { firestore } from "@/app/firebase/config";
 import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { Reporter } from "@/app/store/models/reporter/reporterModel";
-import { store } from "@/app/store/store";
 import { reporterCollectionName } from "@/app/Utils/Utils";
 import { collection, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 
-function ReporterView() {
+function Reporters() {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditReporter, setIsEditReporter] = useState(false);
@@ -143,4 +141,4 @@ function ReporterView() {
   );
 }
 
-export default ReporterView;
+export default Reporters;

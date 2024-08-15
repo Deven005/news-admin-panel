@@ -40,14 +40,13 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
     `Bearer ${await auth.currentUser?.getIdToken()}`
   );
 
-  // headers.append("Content-Type", "multipart/form-data");
-
   // "https://news-backend-45h4p5l4ua-el.a.run.app/api";
   // https://news-admin-panel-45h4p5l4ua-el.a.run.app/auth/login
 
   // http://localhost:8080/api
+  // API_URL
 
-  return fetch(`http://localhost:8080/api${url}`, {
+  return fetch(`https://news-backend-45h4p5l4ua-el.a.run.app/api${url}`, {
     method: methodType,
     body: formData,
     headers: headers,
@@ -88,10 +87,39 @@ const showToast = (message: string, type: "s" | "e") => {
   }
 };
 
+const convertTimestampToDate = (timestamp: {
+  _seconds: number;
+  _nanoseconds: number;
+}): string => {
+  if (
+    !timestamp ||
+    typeof timestamp._seconds !== "number" ||
+    typeof timestamp._nanoseconds !== "number"
+  ) {
+    return "Invalid Date"; // Handle unexpected inputs
+  }
+
+  const milliseconds =
+    timestamp._seconds * 1000 + Math.floor(timestamp._nanoseconds / 1e6);
+  const date = new Date(milliseconds);
+
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+    timeZoneName: "short",
+  });
+};
+
 export {
   doApiCall,
   formatDate,
   showToast,
+  convertTimestampToDate,
   adminCollectionName,
   userCollectionName,
   reporterCollectionName,

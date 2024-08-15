@@ -89,7 +89,7 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
           `Something is wrong while ${
             isEdit ? "Updating" : "Adding"
           } Historical place`,
-          "s"
+          "e"
         );
       }
     } catch (error) {

@@ -6,6 +6,7 @@ import { historicalPlaceModel } from "./models/historical-places/historicalPlace
 import { newsModel } from "./models/news/NewsModel";
 import { talukaModel } from "./models/taluka/talukaModel";
 import { adminModel } from "./models/admin/adminModel";
+import userModel from "./models/user/userModel";
 
 // export interface StoreModel {
 //   todos: string[];
@@ -22,6 +23,7 @@ export const store = createStore(
       news: newsModel,
       taluka: talukaModel,
       admin: adminModel,
+      user: userModel,
       // todos: ["Create store", "Wrap application", "Use store"],
       // addTodo: action((state, payload) => {
       //   state.todos.push(payload);
