@@ -48,7 +48,7 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
   // http://localhost:8080/api
   // API_URL
 
-  return fetch(`http://localhost:8080/api${url}`, {
+  return fetch(`https://news-backend-45h4p5l4ua-el.a.run.app/api${url}`, {
     method: methodType,
     body: formData,
     headers: headers,
