@@ -14,25 +14,33 @@ const MyNavBar = () => {
     (state) => state.historicalPlace
   );
   const { listenTalukasChange } = useStoreActions((state) => state.taluka);
+  const { listenStoreChange } = useStoreActions((actions) => actions.store);
 
   useEffect(() => {
     if (isAdmin) {
       listenChangeNews();
       listenPlaceChange();
       listenTalukasChange();
+      listenStoreChange();
     }
-  }, []);
+  }, [
+    listenChangeNews,
+    listenPlaceChange,
+    listenTalukasChange,
+    listenStoreChange,
+  ]);
 
   const getUserLinks = () => {
     if (isAdmin) {
       return [
-        { href: "/admin/taluka", label: "Taluka" },
+        // { href: "/admin/taluka", label: "Taluka" },
         { href: "/admin/content-management", label: "Content Management" },
         { href: "/admin/business", label: "Business" },
         // { href: "/admin/reporter", label: "Reporter" },
         // { href: "/admin/historical-places", label: "Historical Places" },
         // { href: "/admin/admin", label: "Admins" },
         { href: "/admin/users", label: "User Management" },
+        { href: "/admin/location", label: "Location Management" },
       ];
     } else if (isReporter) {
       return [{ href: "/reporter/news", label: "News" }];

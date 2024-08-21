@@ -4,9 +4,12 @@ import SpecialStoriesList from "@/app/components/admin/specialStories/SpecialSto
 import Videos from "@/app/components/admin/videos/Videos";
 import HistoricalPlaces from "@/app/components/historical-places/HistoricalPlaces";
 import News from "@/app/components/news/News";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const ContentManagement = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [selectedContentType, setSelectedContentType] = useState<
     "news" | "historicalPlaces" | "specialStories" | "advertisements" | "videos"
   >("news");
@@ -39,11 +42,23 @@ const ContentManagement = () => {
         setChildren(<p>Default View!</p>);
         break;
     }
+    router.push(`?contentType=${type}`);
   };
 
   useEffect(() => {
-    handleContentTypeChange("specialStories");
-  }, []);
+    const type = searchParams.get("contentType") as
+      | "news"
+      | "historicalPlaces"
+      | "specialStories"
+      | "advertisements"
+      | "videos"
+      | null;
+    if (type) {
+      handleContentTypeChange(type);
+    } else {
+      handleContentTypeChange("specialStories");
+    }
+  }, [searchParams]);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">

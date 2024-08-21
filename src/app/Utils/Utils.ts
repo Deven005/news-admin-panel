@@ -1,5 +1,6 @@
 import { toast } from "react-toastify";
 import { auth } from "../firebase/config";
+import { Timestamp } from "firebase/firestore";
 
 interface ApiCallInput {
   url: string;
@@ -15,6 +16,7 @@ const historicalPlaceCollectionName: string = "historicalPlaceList";
 const talukaCollectionName: string = "talukaList";
 const newsCollectionName: string = "newsList";
 const advertisesCollectionName: string = "advertises";
+const storesCollectionName: string = "stores";
 
 async function doApiCall({ url, formData, callType }: ApiCallInput) {
   var methodType = "";
@@ -53,12 +55,34 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
   });
 }
 
-const formatDate = (date: Date): string => {
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-  const year = date.getFullYear();
+const formatDate = (date: Timestamp | Date | string | undefined) => {
+  if (!date) return "N/A";
 
-  return `${day}-${month}-${year}`;
+  let d: Date;
+
+  if (date instanceof Timestamp) {
+    d = date.toDate();
+  } else if (typeof date === "string") {
+    d = new Date(date);
+  } else if (date instanceof Date) {
+    d = date;
+  } else {
+    return "N/A";
+  }
+
+  if (isNaN(d.getTime())) return "Invalid Date";
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  };
+
+  return d.toLocaleString("en-US", options);
 };
 
 const showToast = (message: string, type: "s" | "e") => {
@@ -115,11 +139,31 @@ const convertTimestampToDate = (timestamp: {
   });
 };
 
+const calculateDistance = (
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+) => {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLng = (lng2 - lng1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+};
+
 export {
   doApiCall,
   formatDate,
   showToast,
   convertTimestampToDate,
+  calculateDistance,
   adminCollectionName,
   userCollectionName,
   reporterCollectionName,
@@ -128,4 +172,5 @@ export {
   talukaCollectionName,
   newsCollectionName,
   advertisesCollectionName,
+  storesCollectionName,
 };

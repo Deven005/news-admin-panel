@@ -8,6 +8,7 @@ import { TalukaModel } from "../store/models/taluka/talukaModel";
 import { AdminModel } from "../store/models/admin/adminModel";
 import { UserModel } from "../store/models/user/userModel";
 import { VideoModel } from "../store/models/admin/videos/videosModel";
+import { StoreModel } from "../store/models/admin/stores/storeModel";
 
 const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
   createTypedHooks<{
@@ -20,6 +21,7 @@ const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
     admin: AdminModel;
     user: UserModel;
     video: VideoModel;
+    store: StoreModel;
   }>();
 
 export { useStoreActions, useStoreState, useStoreDispatch, useStore };

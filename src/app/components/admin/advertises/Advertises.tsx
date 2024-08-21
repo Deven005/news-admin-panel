@@ -1,6 +1,6 @@
 import { firestore } from "@/app/firebase/config";
-import { advertisesCollectionName } from "@/app/Utils/Utils";
-import { collection, onSnapshot } from "firebase/firestore";
+import { advertisesCollectionName, showToast } from "@/app/Utils/Utils";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Loading from "../../Loading";
@@ -39,9 +39,27 @@ const Advertises = () => {
     return () => unsubscribe();
   }, []);
 
-  function onEditViewClickHandler(id: string) {
+  const onEditViewClickHandler = (id: string) => {
     router.push(`${pathName}/advertise/${id}`);
-  }
+  };
+
+  const onDeleteClickHandler = async (advertiseId: string) => {
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this advertise?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      setLoading(true);
+      await deleteDoc(doc(firestore, advertisesCollectionName, advertiseId));
+      showToast("Advertise deleted successfully", "s");
+    } catch (error) {
+      console.error("Error deleting advertise: ", error);
+      showToast("Failed to delete advertise", "e");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return loading ? (
     <Loading />
@@ -64,8 +82,7 @@ const Advertises = () => {
         {advertises.map((advertise) => (
           <div
             key={advertise.advertiseId}
-            className="card shadow-lg p-4 hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
-            onClick={() => onEditViewClickHandler(advertise.advertiseId)}
+            className="card shadow-lg p-4 hover:shadow-2xl transition-shadow duration-300"
           >
             <div className="relative h-40">
               <Image
@@ -92,6 +109,23 @@ const Advertises = () => {
                   advertise.advertiseUpdatedAt.seconds * 1000
                 ).toLocaleString("en-US")}
               </p>
+              <div className="flex justify-between items-center mt-4">
+                <button
+                  onClick={() => onEditViewClickHandler(advertise.advertiseId)}
+                  className="btn btn-primary"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteClickHandler(advertise.advertiseId);
+                  }}
+                  className="btn btn-error"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}

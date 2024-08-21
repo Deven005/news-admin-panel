@@ -2,11 +2,11 @@
 import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { formatDate } from "@/app/Utils/Utils";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 
-const Taluka = () => {
+const Talukas = () => {
   const { talukas, isLoading } = useStoreState((state) => state.taluka);
   const { deleteTaluka } = useStoreActions((actions) => actions.taluka);
   const [error, setError] = useState<string | null>(null);
@@ -157,4 +157,4 @@ const Taluka = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(Taluka), { ssr: false });
+export default dynamic(() => Promise.resolve(Talukas), { ssr: false });
