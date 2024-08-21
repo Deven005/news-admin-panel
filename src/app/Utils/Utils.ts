@@ -1,6 +1,5 @@
 import { toast } from "react-toastify";
 import { auth } from "../firebase/config";
-import { Timestamp } from "firebase/firestore";
 
 interface ApiCallInput {
   url: string;
@@ -15,6 +14,7 @@ const categoryCollectionName: string = "categoryList";
 const historicalPlaceCollectionName: string = "historicalPlaceList";
 const talukaCollectionName: string = "talukaList";
 const newsCollectionName: string = "newsList";
+const advertisesCollectionName: string = "advertises";
 
 async function doApiCall({ url, formData, callType }: ApiCallInput) {
   var methodType = "";
@@ -46,7 +46,7 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
   // http://localhost:8080/api
   // API_URL
 
-  return fetch(`https://news-backend-45h4p5l4ua-el.a.run.app/api${url}`, {
+  return fetch(`http://localhost:8080/api${url}`, {
     method: methodType,
     body: formData,
     headers: headers,
@@ -127,4 +127,5 @@ export {
   historicalPlaceCollectionName,
   talukaCollectionName,
   newsCollectionName,
+  advertisesCollectionName,
 };

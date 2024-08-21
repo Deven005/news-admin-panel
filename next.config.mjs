@@ -8,15 +8,7 @@ const nextConfig = {
         hostname: "**",
       },
     ],
-  },
-  async redirects() {
-    return [
-      {
-        source: "/404",
-        destination: "/404",
-        permanent: false,
-      },
-    ];
+    unoptimized: true,
   },
 };
 

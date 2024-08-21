@@ -1,17 +1,49 @@
 "use client";
+import Advertises from "@/app/components/admin/advertises/Advertises";
 import SpecialStoriesList from "@/app/components/admin/specialStories/SpecialStoriesList";
+import Videos from "@/app/components/admin/videos/Videos";
 import HistoricalPlaces from "@/app/components/historical-places/HistoricalPlaces";
 import News from "@/app/components/news/News";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const ContentManagement = () => {
   const [selectedContentType, setSelectedContentType] = useState<
-    "news" | "historicalPlaces" | "specialStories" | "advertisements"
+    "news" | "historicalPlaces" | "specialStories" | "advertisements" | "videos"
   >("news");
+  const [children, setChildren] = useState<JSX.Element>();
 
   const handleContentTypeChange = (type: typeof selectedContentType) => {
     setSelectedContentType(type);
+    switch (type) {
+      case "advertisements":
+        setChildren(<Advertises />);
+        break;
+
+      case "historicalPlaces":
+        setChildren(<HistoricalPlaces />);
+        break;
+
+      case "news":
+        setChildren(<News />);
+        break;
+
+      case "specialStories":
+        setChildren(<SpecialStoriesList />);
+        break;
+
+      case "videos":
+        setChildren(<Videos />);
+        break;
+
+      default:
+        setChildren(<p>Default View!</p>);
+        break;
+    }
   };
+
+  useEffect(() => {
+    handleContentTypeChange("specialStories");
+  }, []);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -21,11 +53,27 @@ const ContentManagement = () => {
       <div className="tabs tabs-boxed justify-center mb-8">
         <a
           className={`tab tab-lg tab-lifted ${
+            selectedContentType === "specialStories" && "tab-active"
+          }`}
+          onClick={() => handleContentTypeChange("specialStories")}
+        >
+          Special Stories
+        </a>
+        <a
+          className={`tab tab-lg tab-lifted ${
             selectedContentType === "news" && "tab-active"
           }`}
           onClick={() => handleContentTypeChange("news")}
         >
           News
+        </a>
+        <a
+          className={`tab tab-lg tab-lifted ${
+            selectedContentType === "videos" && "tab-active"
+          }`}
+          onClick={() => handleContentTypeChange("videos")}
+        >
+          Videos
         </a>
         <a
           className={`tab tab-lg tab-lifted ${
@@ -37,14 +85,6 @@ const ContentManagement = () => {
         </a>
         <a
           className={`tab tab-lg tab-lifted ${
-            selectedContentType === "specialStories" && "tab-active"
-          }`}
-          onClick={() => handleContentTypeChange("specialStories")}
-        >
-          Special Stories
-        </a>
-        <a
-          className={`tab tab-lg tab-lifted ${
             selectedContentType === "advertisements" && "tab-active"
           }`}
           onClick={() => handleContentTypeChange("advertisements")}
@@ -53,17 +93,18 @@ const ContentManagement = () => {
         </a>
       </div>
       <div className="card bg-base-100 shadow-lg p-6">
-        {selectedContentType === "news" ? (
+        {children}
+        {/* {selectedContentType === "news" ? (
           <News />
         ) : selectedContentType === "historicalPlaces" ? (
           <HistoricalPlaces />
         ) : selectedContentType === "specialStories" ? (
           <SpecialStoriesList />
+        ) : selectedContentType === "advertisements" ? (
+          <Advertises />
         ) : (
-          <div className="flex justify-center items-center h-32">
-            <p className="text-xl">Coming soon!</p>
-          </div>
-        )}
+          <p>Coming soon!</p>
+        )} */}
       </div>
     </div>
   );

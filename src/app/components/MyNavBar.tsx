@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { useStoreActions, useStoreState } from "../hooks/hooks";
 import Image from "next/image";
 
@@ -9,8 +9,20 @@ const MyNavBar = () => {
   const { isAdmin, isReporter, isAuthenticated } = useStoreState(
     (state) => state.auth
   );
+  const { listenChangeNews } = useStoreActions((state) => state.news);
+  const { listenPlaceChange } = useStoreActions(
+    (state) => state.historicalPlace
+  );
+  const { listenTalukasChange } = useStoreActions((state) => state.taluka);
 
-  // Determine the links based on the user type
+  useEffect(() => {
+    if (isAdmin) {
+      listenChangeNews();
+      listenPlaceChange();
+      listenTalukasChange();
+    }
+  }, []);
+
   const getUserLinks = () => {
     if (isAdmin) {
       return [

@@ -12,26 +12,11 @@ const News = () => {
   const router = useRouter();
   const { news, loading } = useStoreState((state) => state.news);
   const talukas = useStoreState((state) => state.taluka.talukas);
-  const { changeNews, setLoading } = useStoreActions((state) => state.news);
+  const { setLoading } = useStoreActions((state) => state.news);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTaluka, setSelectedTaluka] = useState("all");
   const [filteredNews, setFilteredNews] = useState<NewsType[]>([]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        await changeNews();
-      } catch (err) {
-        console.log("Failed to load news.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [changeNews]);
 
   useEffect(() => {
     let filtered = news;

@@ -27,7 +27,7 @@ export interface NewsTypeModel {
   setLoading: Action<NewsTypeModel, boolean>;
   news: NewsType[];
   setNews: Action<NewsTypeModel, NewsType[]>;
-  changeNews: Thunk<NewsTypeModel>;
+  listenChangeNews: Thunk<NewsTypeModel>;
 }
 
 const newsModel: NewsTypeModel = {
@@ -35,7 +35,7 @@ const newsModel: NewsTypeModel = {
   setNews: action((state, payload) => {
     state.news = payload;
   }),
-  changeNews: thunk((actions) => {
+  listenChangeNews: thunk((actions) => {
     actions.setLoading(true);
     const unsubscribe = onSnapshot(
       collection(firestore, newsCollectionName),

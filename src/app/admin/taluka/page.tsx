@@ -8,24 +8,10 @@ import { usePathname, useRouter } from "next/navigation";
 
 const Taluka = () => {
   const { talukas, isLoading } = useStoreState((state) => state.taluka);
-  const { fetchTalukas, deleteTaluka } = useStoreActions(
-    (actions) => actions.taluka
-  );
+  const { deleteTaluka } = useStoreActions((actions) => actions.taluka);
   const [error, setError] = useState<string | null>(null);
   const usePath = usePathname();
   const router = useRouter();
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        await fetchTalukas(); // Trigger data fetching
-      } catch (err) {
-        setError("Failed to load talukas.");
-      }
-    };
-
-    loadData();
-  }, [fetchTalukas]);
 
   const handleEdit = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,

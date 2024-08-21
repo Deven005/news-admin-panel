@@ -2,9 +2,10 @@
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";
 import { firestore } from "@/app/firebase/config";
-import { useState, useEffect } from "react";
-import { showToast } from "@/app/Utils/Utils";
+import { useState, useEffect, useRef } from "react";
+import { doApiCall, showToast } from "@/app/Utils/Utils";
 import Loading from "@/app/components/Loading";
+import Image from "next/image";
 
 const SpecialStoryDetails = () => {
   const pathname = usePathname();
@@ -12,6 +13,9 @@ const SpecialStoryDetails = () => {
   const router = useRouter();
   const [story, setStory] = useState<any>();
   const [loading, setLoading] = useState(true);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -19,7 +23,9 @@ const SpecialStoryDetails = () => {
       const unsubscribe = onSnapshot(
         doc(firestore, "specialStories", id),
         (doc) => {
-          setStory({ id: doc.id, ...doc.data() });
+          const data = doc.data();
+          setStory({ id: doc.id, ...data });
+          setImagePreview(data?.image || null); // Set the initial image
           setLoading(false);
         }
       );
@@ -32,14 +38,33 @@ const SpecialStoryDetails = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      await updateDoc(doc(firestore, "specialStories", id!), story);
-      showToast("Story updated!", "s");
-      setLoading(false);
+      const updatedStory = { ...story };
+      const updateStoryFormData = new FormData();
+
+      if (updatedStory["title"])
+        updateStoryFormData.append("title", story.title);
+
+      if (updatedStory["description"])
+        updateStoryFormData.append("description", story.description);
+
+      if (selectedFile) updateStoryFormData.append("file", selectedFile);
+
+      const response = await doApiCall({
+        url: `/admin/special-stories/${id}`,
+        callType: "p",
+        formData: updateStoryFormData,
+      });
+      if (!response.ok) {
+        throw new Error(await response.json());
+      }
+
+      showToast((await response.json())["message"] ?? "Story updated!", "s");
       router.back();
-    } catch (error) {
-      setLoading(false);
+    } catch (error: any) {
       console.error("Failed to update story", error);
-      showToast("Story not updated!", "e");
+      showToast(error["message"] ?? "Story not updated!", "e");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,6 +74,23 @@ const SpecialStoryDetails = () => {
     setStory({ ...story, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    fileInputRef.current?.click();
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      setSelectedFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setImagePreview(story.image || null); // Show the original image
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset the file input value
+    }
+  };
+
   return loading ? (
     <Loading />
   ) : !story ? (
@@ -56,54 +98,85 @@ const SpecialStoryDetails = () => {
       <p className="text-xl">Story not found.</p>
     </div>
   ) : (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto mt-6">
       <h1 className="text-3xl font-bold mb-6">Edit Special Story</h1>
-      <form onSubmit={handleUpdate} className="card shadow-lg p-6 space-y-4">
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Title</span>
+      <form onSubmit={handleUpdate} className="flex flex-col md:flex-row gap-6">
+        <div className="relative flex-shrink-0 w-full md:w-1/3 h-80">
+          <div className="relative w-full h-full">
+            {imagePreview ? (
+              <div className="relative w-full h-full">
+                <Image
+                  src={imagePreview}
+                  alt="Story Image"
+                  layout="fill"
+                  className="rounded-lg object-fill"
+                  unoptimized
+                />
+                {selectedFile && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-2 right-2 btn btn-xs btn-circle btn-error transform hover:scale-110 transition-transform"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center w-full h-full bg-gray-100 rounded-lg border border-gray-300">
+                <span className="text-gray-500">No image selected</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <div className="form-control mb-4">
+            <label className="label">
+              <span className="label-text">Title</span>
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={story.title}
+              onChange={handleChange}
+              className="input input-bordered w-full"
+              required
+            />
+          </div>
+
+          <div className="form-control mb-4">
+            <label className="label">
+              <span className="label-text">Description</span>
+            </label>
+            <textarea
+              name="description"
+              value={story.description}
+              onChange={handleChange}
+              className="textarea textarea-bordered w-full"
+              required
+            ></textarea>
+          </div>
+
+          <label className="block text-lg font-medium text-gray-700 mt-4">
+            Select Banner Image
           </label>
           <input
-            type="text"
-            name="title"
-            value={story.title}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-            required
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            className="file-input file-input-bordered w-full max-w-xs mt-2"
           />
-        </div>
 
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Description</span>
-          </label>
-          <textarea
-            name="description"
-            value={story.description}
-            onChange={handleChange}
-            className="textarea textarea-bordered w-full"
-            required
-          ></textarea>
-        </div>
-
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Image</span>
-          </label>
-          {story.image && (
-            <div className="mb-4">
-              <img
-                src={story.image}
-                alt="Story Image"
-                className="rounded-lg w-full h-64 object-cover shadow-md"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="form-control">
-          <button type="submit" className="btn btn-primary w-full">
-            Update Story
+          <button
+            type="submit"
+            className={`btn btn-primary w-full ${
+              loading ? "loading" : ""
+            } mt-4 mb-4`}
+            disabled={loading}
+          >
+            {loading ? "Updating..." : "Update Story"}
           </button>
         </div>
       </form>

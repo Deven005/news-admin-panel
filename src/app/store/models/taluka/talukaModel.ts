@@ -18,7 +18,7 @@ export interface TalukaModel {
   isLoading: boolean;
   setLoading: Action<TalukaModel, boolean>;
   talukas: Taluka[];
-  fetchTalukas: Thunk<TalukaModel>;
+  listenTalukasChange: Thunk<TalukaModel>;
   addOrUpdateTaluka: Thunk<
     TalukaModel,
     Partial<Taluka> & { image?: File | null }
@@ -35,7 +35,7 @@ const talukaModel: TalukaModel = {
   setTalukas: action((state, payload) => {
     state.talukas = payload;
   }),
-  fetchTalukas: thunk(async (actions) => {
+  listenTalukasChange: thunk(async (actions) => {
     try {
       actions.setLoading(true);
       const unsubscribe = onSnapshot(

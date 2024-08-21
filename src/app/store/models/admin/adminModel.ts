@@ -50,7 +50,6 @@ const adminModel: AdminModel = {
         throw await response.json();
       }
       const resJson = await response.json();
-      console.log("resJson: ", resJson);
       if ("admins" in resJson) {
         getState().admins = [
           ...resJson["admins"].map(

@@ -7,6 +7,7 @@ import { NewsTypeModel } from "../store/models/news/NewsModel";
 import { TalukaModel } from "../store/models/taluka/talukaModel";
 import { AdminModel } from "../store/models/admin/adminModel";
 import { UserModel } from "../store/models/user/userModel";
+import { VideoModel } from "../store/models/admin/videos/videosModel";
 
 const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
   createTypedHooks<{
@@ -18,6 +19,7 @@ const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
     taluka: TalukaModel;
     admin: AdminModel;
     user: UserModel;
+    video: VideoModel;
   }>();
 
 export { useStoreActions, useStoreState, useStoreDispatch, useStore };

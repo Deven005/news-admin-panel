@@ -24,9 +24,12 @@ const Users = () => {
           className="select select-bordered"
           onChange={(e) => handleRoleSelection(e.target.value as UserRole)}
         >
-          {usersTypeList.map((userType: UserRole) => {
+          {usersTypeList.map((userType: UserRole, index) => {
             return (
-              <option selected={selectedRole == userType ? true : false}>
+              <option
+                selected={selectedRole == userType ? true : false}
+                key={index}
+              >
                 {userType}
               </option>
             );
