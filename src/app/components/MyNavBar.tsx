@@ -24,6 +24,7 @@ const MyNavBar = () => {
       listenStoreChange();
     }
   }, [
+    isAdmin,
     listenChangeNews,
     listenPlaceChange,
     listenTalukasChange,
