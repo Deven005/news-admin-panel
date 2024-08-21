@@ -2,9 +2,11 @@
 import Stores from "@/app/components/admin/stores/Stores";
 import Talukas from "@/app/components/admin/taluka/Talukas";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-const ContentManagement = () => {
+import React from "react";
+
+const LocationManagementSuspense = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedContentType, setSelectedContentType] = useState<
@@ -38,7 +40,6 @@ const ContentManagement = () => {
       handleContentTypeChange("stores");
     }
   }, [searchParams]);
-
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-4xl font-bold mb-8 text-center">
@@ -67,4 +68,12 @@ const ContentManagement = () => {
   );
 };
 
-export default ContentManagement;
+const LocationManagement = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LocationManagementSuspense />
+    </Suspense>
+  );
+};
+
+export default LocationManagement;
