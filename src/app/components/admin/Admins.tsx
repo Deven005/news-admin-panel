@@ -65,7 +65,7 @@ const Admins = () => {
     getAdmins();
   }, [getAdmins]);
 
-  return loading ? (
+  return loading && admins.length == 0 ? (
     <Loading />
   ) : (
     <div className="container mx-auto p-4">

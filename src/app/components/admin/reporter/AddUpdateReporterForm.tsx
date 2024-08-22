@@ -1,3 +1,4 @@
+import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { Reporter } from "@/app/store/models/reporter/reporterModel";
 import { doApiCall, showToast } from "@/app/Utils/Utils";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -49,7 +50,8 @@ function AddUpdateReporterForm({
   reporterToEditOrDelete,
   setReporterToEditOrDelete,
 }: PropsType) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading } = useStoreState((state) => state.reporter);
+  const { setLoading } = useStoreActions((actions) => actions.reporter);
   const {
     register,
     handleSubmit,
@@ -68,7 +70,7 @@ function AddUpdateReporterForm({
   }, []);
 
   const onModalCancelHandler = () => {
-    setIsLoading(false);
+    setLoading(false);
     setIsModalOpen(false);
     setReporterToEditOrDelete(undefined);
     setIsEditReporter(false);
@@ -77,7 +79,7 @@ function AddUpdateReporterForm({
   const handleAddUpdateReporter = async (event: ReporterFormType) => {
     console.log("event: ", event);
     try {
-      setIsLoading(true);
+      setLoading(true);
       const { reporterFirstName, reporterLastName, reporterEmail } = event;
       const addUpdateReporterForm = new FormData();
       addUpdateReporterForm.append("reporterFirstName", reporterFirstName);
@@ -102,11 +104,12 @@ function AddUpdateReporterForm({
       onModalCancelHandler();
     } catch (error) {
       console.log("add reporter error: ", error);
-      setIsLoading(false);
       showToast(
         `${isEditReporter ? "Update" : "Add"} reporter is not done!`,
         "e"
       );
+    } finally {
+      setLoading(false);
     }
   };
 

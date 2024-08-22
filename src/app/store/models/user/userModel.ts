@@ -1,6 +1,5 @@
 import { doApiCall, showToast } from "@/app/Utils/Utils";
 import { Action, action, Thunk, thunk } from "easy-peasy";
-import { Timestamp } from "firebase/firestore";
 
 export interface User {
   id: string;
@@ -33,11 +32,7 @@ const userModel: UserModel = {
       if (!("users" in response)) {
         showToast("No users found!", "e");
       }
-      const users: User[] = [];
-      console.log("creationTime TYPE: ", response["users"][0].creationTime);
-      console.log("lastSignInTime TYPE: ", response["users"][0].lastSignInTime);
-      response["users"].map((user: User) => users.push(user));
-      getState().users = users;
+      getState().users = [...response["users"].map((user: User) => user)];
     } catch (error) {
       console.log("fetchUsers catch: ", error);
       throw error;

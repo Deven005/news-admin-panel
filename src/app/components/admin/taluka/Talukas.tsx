@@ -18,7 +18,7 @@ const Talukas = () => {
     id: string
   ) => {
     e.stopPropagation();
-    router.push(`${usePath}/update/${id}`);
+    router.push(`${usePath}/taluka/update/${id}`);
   };
 
   const handleDelete = async (
@@ -35,13 +35,15 @@ const Talukas = () => {
     }
   };
 
-  const handleView = (id: string) => router.push(`${usePath}/${id}`);
+  function handleView(id: string) {
+    router.push(`${usePath}/taluka/${id}`);
+  }
 
   return (
     <>
       {!isLoading && (
         <button
-          onClick={() => router.push(`${usePath}/create`)}
+          onClick={() => router.push(`${usePath}/taluka/create`)}
           className="btn btn-primary ml-5"
         >
           Add Taluka

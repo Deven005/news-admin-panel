@@ -73,7 +73,7 @@ const StoreDetails = () => {
             <h1 className="text-4xl font-bold text-gray-800">
               {store.storeName}
             </h1>
-            <button
+            {/* <button
               onClick={() =>
                 router.push(
                   pathname.replace(
@@ -85,7 +85,7 @@ const StoreDetails = () => {
               className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
             >
               Edit
-            </button>
+            </button> */}
             <button
               onClick={handleStatusToggle}
               className={`px-4 py-2 rounded-lg text-white ${

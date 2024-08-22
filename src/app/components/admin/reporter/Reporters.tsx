@@ -1,64 +1,50 @@
 "use client";
 import AddUpdateReporterForm from "@/app/components/admin/reporter/AddUpdateReporterForm";
-import { firestore } from "@/app/firebase/config";
-import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
+import { useStoreState } from "@/app/hooks/hooks";
 import { Reporter } from "@/app/store/models/reporter/reporterModel";
-import { reporterCollectionName } from "@/app/Utils/Utils";
-import { collection, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
+import Loading from "../../Loading";
 
 function Reporters() {
-  const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditReporter, setIsEditReporter] = useState(false);
   const token = useStoreState((state) => state.auth.token);
-  const reporters = useStoreState((state) => state.reporter.reporters);
-  const deleteReporter = useStoreActions(
-    (state) => state.reporter.deleteReporter
-  );
-  const updateReporter = useStoreActions(
-    (state) => state.reporter.updateReporter
-  );
-  const addReporter = useStoreActions((state) => state.reporter.addReporter);
+  const { reporters, isLoading } = useStoreState((state) => state.reporter);
   const [reporterToEditOrDelete, setReporterToEditOrDelete] =
     useState<Reporter>();
 
   useEffect(() => {
-    setIsLoading(true);
-    const unsubscribe = onSnapshot(
-      collection(firestore, reporterCollectionName),
-      async (snapshot) => {
-        setIsLoading(true);
-        snapshot.docChanges().forEach((change) => {
-          var changedReporterIndex: number = reporters.findIndex(
-            (val) => val.reporterID == change.doc.id
-          );
-
-          const reporterData = change.doc.data();
-
-          console.log("changedReporterIndex: ", changedReporterIndex);
-
-          if (change.type === "added" && changedReporterIndex == -1) {
-            addReporter({
-              reporterID: reporterData["reporterID"] ?? change.doc.id,
-              reporterFirstName: reporterData["reporterFirstName"],
-              reporterLastName: reporterData["reporterLastName"],
-              reporterEmail: reporterData["reporterEmail"],
-            } as Reporter);
-          } else if (change.type === "modified") {
-            if (changedReporterIndex !== -1) {
-              // Handle modified document
-              updateReporter({ changedReporterIndex, reporterData });
-            }
-          } else if (change.type === "removed" && changedReporterIndex !== -1) {
-            // Handle removed document
-            deleteReporter(changedReporterIndex);
-          }
-        });
-        setIsLoading(false);
-      }
-    );
-    return () => unsubscribe();
+    // const unsubscribe = onSnapshot(
+    //   collection(firestore, reporterCollectionName),
+    //   async (snapshot) => {
+    //     setIsLoading(true);
+    //     snapshot.docChanges().forEach((change) => {
+    //       var changedReporterIndex: number = reporters.findIndex(
+    //         (val) => val.reporterID == change.doc.id
+    //       );
+    //       const reporterData = change.doc.data();
+    //       console.log("changedReporterIndex: ", changedReporterIndex);
+    //       if (change.type === "added" && changedReporterIndex == -1) {
+    //         addReporter({
+    //           reporterID: reporterData["reporterID"] ?? change.doc.id,
+    //           reporterFirstName: reporterData["reporterFirstName"],
+    //           reporterLastName: reporterData["reporterLastName"],
+    //           reporterEmail: reporterData["reporterEmail"],
+    //         } as Reporter);
+    //       } else if (change.type === "modified") {
+    //         if (changedReporterIndex !== -1) {
+    //           // Handle modified document
+    //           updateReporter({ changedReporterIndex, reporterData });
+    //         }
+    //       } else if (change.type === "removed" && changedReporterIndex !== -1) {
+    //         // Handle removed document
+    //         deleteReporter(changedReporterIndex);
+    //       }
+    //     });
+    //     setIsLoading(false);
+    //   }
+    // );
+    // return () => unsubscribe();
   }, []);
 
   function editReporterClickHandler(reporter: Reporter) {
@@ -68,7 +54,7 @@ function Reporters() {
   }
 
   return isLoading ? (
-    <p className="text-center pt-20">Loading...</p>
+    <Loading />
   ) : (
     <>
       <button className="btn text-right" onClick={() => setIsModalOpen(true)}>

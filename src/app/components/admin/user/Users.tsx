@@ -21,7 +21,7 @@ const UserList = () => {
     loadUsers();
   }, [fetchUsers]);
 
-  return loading ? (
+  return loading && users.length == 0 ? (
     <Loading />
   ) : users.length === 0 ? (
     <div className="flex justify-center items-center text-center min-h-80">

@@ -9,6 +9,8 @@ import { adminModel } from "./models/admin/adminModel";
 import userModel from "./models/user/userModel";
 import { videoModel } from "./models/admin/videos/videosModel";
 import { storeModel } from "./models/admin/stores/storeModel";
+import { emergencyContactsModel } from "./models/admin/emergencyContacts/emergencyContactsModel";
+import { faqsModel } from "./models/admin/emergencyContacts/faqs/faqsModel";
 
 // export interface StoreModel {
 //   todos: string[];
@@ -28,6 +30,8 @@ export const store = createStore(
       user: userModel,
       video: videoModel,
       store: storeModel,
+      emergencyContacts: emergencyContactsModel,
+      faqs: faqsModel,
       // todos: ["Create store", "Wrap application", "Use store"],
       // addTodo: action((state, payload) => {
       //   state.todos.push(payload);

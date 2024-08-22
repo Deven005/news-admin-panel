@@ -15,6 +15,13 @@ const MyNavBar = () => {
   );
   const { listenTalukasChange } = useStoreActions((state) => state.taluka);
   const { listenStoreChange } = useStoreActions((actions) => actions.store);
+  const fetchUsers = useStoreActions((actions) => actions.user.fetchUsers);
+  const { getAdmins } = useStoreActions((states) => states.admin);
+  const { listenToReporters } = useStoreActions((state) => state.reporter);
+  const { listenEmergencyContacts } = useStoreActions(
+    (state) => state.emergencyContacts
+  );
+  const { listenFAQs } = useStoreActions((actions) => actions.faqs);
 
   useEffect(() => {
     if (isAdmin) {
@@ -22,6 +29,11 @@ const MyNavBar = () => {
       listenPlaceChange();
       listenTalukasChange();
       listenStoreChange();
+      listenToReporters();
+      listenEmergencyContacts();
+      listenFAQs();
+      fetchUsers();
+      getAdmins();
     }
   }, [
     isAdmin,
@@ -29,6 +41,11 @@ const MyNavBar = () => {
     listenPlaceChange,
     listenTalukasChange,
     listenStoreChange,
+    listenToReporters,
+    listenEmergencyContacts,
+    listenFAQs,
+    fetchUsers,
+    getAdmins,
   ]);
 
   const getUserLinks = () => {
@@ -42,6 +59,10 @@ const MyNavBar = () => {
         // { href: "/admin/admin", label: "Admins" },
         { href: "/admin/users", label: "User Management" },
         { href: "/admin/location", label: "Location Management" },
+        {
+          href: "/admin/communication-faqs",
+          label: "Communication Management & FAQs",
+        },
       ];
     } else if (isReporter) {
       return [{ href: "/reporter/news", label: "News" }];
