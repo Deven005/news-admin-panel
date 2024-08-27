@@ -63,6 +63,7 @@ const statusModel: StatusModel = {
 
   addStatus: thunk(async (actions, payload) => {
     try {
+      actions.setLoading(true);
       const { category, images } = payload;
       const formData = new FormData();
       formData.append("statusCatID", category);
@@ -79,10 +80,14 @@ const statusModel: StatusModel = {
       if (!response.ok) {
         throw new Error(await response.json());
       }
-
-      showToast("Status added successfully!", "s");
+      showToast(
+        (await response.json())["message"] ?? "Status added successfully!",
+        "s"
+      );
     } catch (error: any) {
       showToast(error["message"] ?? "Failed to add status!", "e");
+    } finally {
+      actions.setLoading(false);
     }
   }),
 
