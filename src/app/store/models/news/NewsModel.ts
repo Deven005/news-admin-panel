@@ -1,7 +1,7 @@
-import { firestore } from "@/app/firebase/config";
+import { auth, firestore } from "@/app/firebase/config";
 import { newsCollectionName } from "@/app/Utils/Utils";
 import { action, Action, thunk, Thunk } from "easy-peasy";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import firebase from "firebase/compat/app";
 
 interface NewsType {
@@ -28,6 +28,7 @@ export interface NewsTypeModel {
   news: NewsType[];
   setNews: Action<NewsTypeModel, NewsType[]>;
   listenChangeNews: Thunk<NewsTypeModel>;
+  listenChangeNewsForReporter: Thunk<NewsTypeModel>;
 }
 
 const newsModel: NewsTypeModel = {
@@ -123,6 +124,41 @@ const newsModel: NewsTypeModel = {
     //     }
     //     break;
     // }
+  }),
+  listenChangeNewsForReporter: thunk(async (actions) => {
+    // Set loading state
+    actions.setLoading(true);
+
+    // Get current user ID from Firebase Auth
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      // No authenticated user, stop execution
+      actions.setLoading(false);
+      return;
+    }
+
+    // Subscribe to the filtered news collection
+    const unsubscribe = onSnapshot(
+      query(
+        collection(firestore, newsCollectionName), // Adjust 'news' to your collection name
+        where("reporterID", "==", currentUser.uid),
+        where("isActive", "==", true)
+      ),
+      (snapshot) => {
+        actions.setLoading(true);
+        actions.setNews([
+          ...(snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as NewsType[]),
+        ]);
+        actions.setLoading(false);
+      }
+    );
+
+    // Clean up subscription on unmount or if necessary
+    return () => unsubscribe();
   }),
   loading: false,
   setLoading: action((state, payload) => {

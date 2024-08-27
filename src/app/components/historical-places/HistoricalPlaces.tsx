@@ -12,15 +12,11 @@ const HistoricalPlaces = () => {
   const { historicalPlaces, isLoading } = useStoreState(
     (state) => state.historicalPlace
   );
-  const { listenPlaceChange, deleteHistoricalPlace } = useStoreActions(
+  const { deleteHistoricalPlace } = useStoreActions(
     (state) => state.historicalPlace
   );
 
   const pathname = usePathname();
-
-  useEffect(() => {
-    listenPlaceChange();
-  }, [listenPlaceChange]);
 
   const handleEditPlaceClick = (place: HistoricalPlace) => {
     router.push(`${pathname}/historical-places/${place.placeID}`);

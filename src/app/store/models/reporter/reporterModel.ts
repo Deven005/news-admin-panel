@@ -1,13 +1,20 @@
 import { firestore } from "@/app/firebase/config";
 import { reporterCollectionName } from "@/app/Utils/Utils";
 import { action, Action, thunk, Thunk } from "easy-peasy";
-import { collection, DocumentData, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  DocumentData,
+  onSnapshot,
+  Timestamp,
+} from "firebase/firestore";
 
 interface Reporter {
   reporterID: string;
   reporterFirstName: string;
   reporterLastName: string;
   reporterEmail: string;
+  reporterUpdatedAt: Timestamp;
+  reporterCreatedAt: Timestamp;
 }
 
 interface UpdateReporter {
@@ -46,7 +53,7 @@ const reporterModel: ReporterModel = {
         ];
       }
     );
-    return unsubscribe();
+    return () => unsubscribe();
   }),
   setLoading: action((state, payload) => {
     state.isLoading = payload;

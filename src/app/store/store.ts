@@ -11,6 +11,8 @@ import { videoModel } from "./models/admin/videos/videosModel";
 import { storeModel } from "./models/admin/stores/storeModel";
 import { emergencyContactsModel } from "./models/admin/emergencyContacts/emergencyContactsModel";
 import { faqsModel } from "./models/admin/emergencyContacts/faqs/faqsModel";
+import statusModel from "./models/admin/status/statusModel";
+import { requirementsModel } from "./models/admin/requirements/requirementModel";
 
 // export interface StoreModel {
 //   todos: string[];
@@ -32,6 +34,8 @@ export const store = createStore(
       store: storeModel,
       emergencyContacts: emergencyContactsModel,
       faqs: faqsModel,
+      requirements: requirementsModel,
+      status: statusModel,
       // todos: ["Create store", "Wrap application", "Use store"],
       // addTodo: action((state, payload) => {
       //   state.todos.push(payload);

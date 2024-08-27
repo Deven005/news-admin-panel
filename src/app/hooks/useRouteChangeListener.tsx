@@ -20,20 +20,22 @@ export function RouteChangeListener() {
     }
 
     if (isAuthenticated) {
-      if (isAdmin && !pathname.startsWith("/admin") && pathname !== "/") {
-        router.push("/not-found");
-        return;
-      }
-
-      if (isReporter && !pathname.startsWith("/reporter") && pathname !== "/") {
+      if (
+        isReporter &&
+        !pathname.startsWith("/reporter") &&
+        pathname !== "/" &&
+        pathname !== "/profile"
+      ) {
         router.push("/not-found");
         return;
       }
 
       // Allow admins to access /admin and /, reporters to access /reporter and /
       if (
-        (isAdmin && (pathname.startsWith("/admin") || pathname === "/")) ||
-        (isReporter && (pathname.startsWith("/reporter") || pathname === "/"))
+        isAdmin ||
+        (isReporter &&
+          (pathname.startsWith("/reporter") || pathname === "/")) ||
+        pathname === "/profile"
       ) {
         // Valid route for the user's role, no redirect needed
         return;

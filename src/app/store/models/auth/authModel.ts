@@ -36,6 +36,7 @@ export interface AuthModel {
   setUser: Action<AuthModel, User | undefined>;
   logout: Thunk<AuthModel, null>;
   listenToAuthChanges: Thunk<AuthModel>;
+  sendPasswordResetEmail: Thunk<AuthModel, string>;
 }
 
 const authModel: AuthModel = {
@@ -45,6 +46,7 @@ const authModel: AuthModel = {
   isAuthenticated: false,
   user: undefined,
   token: "",
+  sendPasswordResetEmail: thunk((state, email) => {}),
   setLoading: action((state, payload) => {
     state.isLoading = payload;
   }),
@@ -101,7 +103,7 @@ const authModel: AuthModel = {
   logout: thunk(async (actions, _, { getState }) => {
     try {
       actions.setLoading(true);
-
+      // localStorage.removeItem("[EasyPeasyStore][0]");
       await auth.signOut();
       await store.persist.flush();
       await store.persist.clear();
@@ -110,6 +112,7 @@ const authModel: AuthModel = {
       getState().isAuthenticated = false;
       getState().isAdmin = false;
       getState().isReporter = false;
+      localStorage.clear();
     } catch (error) {
       console.error("Logout Action Error: ", error);
     } finally {

@@ -11,6 +11,8 @@ import { VideoModel } from "../store/models/admin/videos/videosModel";
 import { StoreModel } from "../store/models/admin/stores/storeModel";
 import { EmergencyContactsModel } from "../store/models/admin/emergencyContacts/emergencyContactsModel";
 import { FAQsModel } from "../store/models/admin/emergencyContacts/faqs/faqsModel";
+import { RequirementsModel } from "../store/models/admin/requirements/requirementModel";
+import { StatusModel } from "../store/models/admin/status/statusModel";
 
 const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
   createTypedHooks<{
@@ -26,6 +28,8 @@ const { useStoreActions, useStoreState, useStoreDispatch, useStore } =
     store: StoreModel;
     emergencyContacts: EmergencyContactsModel;
     faqs: FAQsModel;
+    requirements: RequirementsModel;
+    status: StatusModel;
   }>();
 
 export { useStoreActions, useStoreState, useStoreDispatch, useStore };

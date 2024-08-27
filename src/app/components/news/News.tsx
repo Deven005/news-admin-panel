@@ -70,7 +70,7 @@ const News = () => {
     <Loading />
   ) : (
     <>
-      <div className="flex justify-between items-center mb-4 px-7">
+      <div className="flex justify-between items-center mb-4 px-7 pt-6">
         <button
           onClick={() => router.push(`${pathname}/news/create`)}
           className="btn btn-primary"

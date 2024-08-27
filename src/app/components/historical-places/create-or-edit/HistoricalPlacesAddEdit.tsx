@@ -171,11 +171,11 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
                 className="space-y-4"
               >
                 <InputField
-                  name="placeName"
-                  register={register("placeName")}
+                  {...register("placeName")}
                   type="text"
                   label="Place Name"
                   placeholder="Enter place name"
+                  required={true}
                 />
                 {errors.placeName && (
                   <p className="text-red-500 text-sm">
@@ -186,9 +186,11 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
                 <InputTextAreaField
                   name="placeDescription"
                   register={register("placeDescription")}
+                  type="text"
                   label="Place Description"
                   placeholder="Enter place description"
                   rows={4}
+                  required={true}
                 />
                 {errors.placeDescription && (
                   <p className="text-red-500 text-sm">
@@ -272,7 +274,7 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
                           >
                             <source
                               src={URL.createObjectURL(video)}
-                              type="video/mp4"
+                              type={video.type}
                             />
                             Your browser does not support the video tag.
                           </video>
@@ -290,7 +292,10 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
                   </div>
                 )}
 
-                <div className="mt-4">
+                <div className="mt-8 p-4 bg-white rounded-lg shadow-lg">
+                  <p className="text-2xl font-bold mb-4 text-gray-900">
+                    Select Location on Map:
+                  </p>
                   <GoogleMapComponent
                     draggable={isEdit || place == null ? true : false}
                     onLocationSelect={({ lat, lng }) => {
@@ -303,8 +308,11 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
                 </div>
 
                 <div className="flex justify-end mt-6">
-                  <button type="submit" className="btn btn-primary">
-                    {isEdit ? "Update" : "Add"} Place
+                  <button
+                    type="submit"
+                    className="btn btn-primary text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-700 transition-colors"
+                  >
+                    {isEdit ? "Update" : "Add"} Historical Place
                   </button>
                 </div>
               </form>

@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import Loading from "../../Loading";
 import { showToast } from "@/app/Utils/Utils";
+import ForgetPasswordModal from "./ForgetPasswordModal";
 
 type FormData = {
   email: string;
@@ -21,7 +22,6 @@ const validateSchema = Yup.object()
     password: Yup.string()
       .required("This field is required")
       .min(8, "Password must be 8 or more characters")
-      .default("Abc@1234")
       .matches(
         /(?=.*[a-z])(?=.*[A-Z])\w+/,
         "Password should contain at least one uppercase and lowercase character"
@@ -52,9 +52,16 @@ const LoginForm = () => {
   );
   const login = useStoreActions((state) => state.auth.login);
   const updateAdmin = useStoreActions((state) => state.admin.updateAdmin);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
     const updateAdminSignInTime = async () => {
+      if (isAuthenticated) {
+        closeModal();
+      }
       if (isAdmin && isAuthenticated) {
         await updateAdmin({
           userUid: user!.uid,
@@ -81,14 +88,13 @@ const LoginForm = () => {
 
       const { email, password } = event;
       await login({ email, password });
-      setLoading(false);
       showToast("Login Success!", "s");
-
       router.push("/");
     } catch (error) {
-      setLoading(false);
       console.log("login catch: ", error);
       showToast("Login Error!", "e");
+    } finally {
+      setLoading(false);
     }
   }
   // loading
@@ -198,7 +204,6 @@ const LoginForm = () => {
             {...register("password")}
             placeholder="Password"
             required={true}
-            defaultValue={"123456"}
             className="input input-bordered w-full max-w-xl"
           />
         </label>
@@ -236,7 +241,9 @@ const LoginForm = () => {
             </label>
           </div>
 
-          <a href="#!">Forgot password?</a>
+          <button onClick={openModal} className="text-blue-600 underline">
+            Forgot Password?
+          </button>
         </div>
 
         <div className="text-center lg:text-left">
@@ -250,6 +257,7 @@ const LoginForm = () => {
           </button>
         </div>
       </form>
+      <ForgetPasswordModal isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 };

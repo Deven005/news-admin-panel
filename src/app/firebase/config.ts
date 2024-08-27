@@ -6,6 +6,8 @@ import {
   setPersistence,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getMessaging, isSupported } from "firebase/messaging";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -27,4 +29,17 @@ setPersistence(auth, browserLocalPersistence);
 // const analytics = getAnalytics(firebase_app);
 const firestore = getFirestore(firebase_app);
 
-export { firebase_app, auth, firestore };
+// Initialize Firebase Storage
+const storage = getStorage(firebase_app);
+
+// Messaging
+let messaging: ReturnType<typeof getMessaging> | null = null;
+isSupported().then((supported) => {
+  if (supported) {
+    messaging = getMessaging(firebase_app);
+  } else {
+    console.warn("Firebase Messaging is not supported by this browser.");
+  }
+});
+
+export { firebase_app, auth, firestore, storage, messaging };

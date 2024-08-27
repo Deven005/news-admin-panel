@@ -28,7 +28,6 @@ const userModel: UserModel = {
       const response = await (
         await doApiCall({ url: "/admin/user", callType: "g" })
       ).json();
-      console.log("users: ", response["users"]);
       if (!("users" in response)) {
         showToast("No users found!", "e");
       }
