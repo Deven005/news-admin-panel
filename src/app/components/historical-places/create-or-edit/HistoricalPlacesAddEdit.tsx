@@ -75,7 +75,7 @@ const HistoricalPlacesAddEdit = ({ isEdit = false, place }: PropsType) => {
       selectedVideos.forEach((video) => formData.append("files", video));
 
       const res = await doApiCall({
-        url: `/admin/historical-places/${place?.placeID ?? ""}`,
+        url: `/admin/historical-places/${isEdit ? place!.placeID : ""}`,
         callType: isEdit ? "p" : "",
         formData: formData,
       });
