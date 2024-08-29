@@ -99,8 +99,10 @@ function AddCategoryForm({
     } catch (error) {
       setIsLoading(false);
       console.error("Error adding category:", error);
-      alert("Failed to add category");
-      showToast(`Category ${!isEditCategory ? "added" : "updated"}`, "e");
+      showToast(
+        `Error ${!isEditCategory ? "adding" : "updating"} category`,
+        "e"
+      );
     }
   };
 
