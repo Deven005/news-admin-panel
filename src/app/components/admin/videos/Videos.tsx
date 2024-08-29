@@ -51,7 +51,7 @@ const VideosPage: React.FC = () => {
     router.push(`${pathName}/videos/${id}`);
   };
 
-  return loading && videos.length == 0 ? (
+  return loading ? (
     <Loading />
   ) : (
     <div className="p-6">
