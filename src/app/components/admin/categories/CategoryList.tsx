@@ -247,7 +247,6 @@ const Business = () => {
               </button>
             </div>
           </div>
-          <div className="fixed inset-0 bg-black opacity-50" />
         </div>
       )}
     </>
