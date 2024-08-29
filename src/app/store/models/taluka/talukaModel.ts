@@ -65,8 +65,6 @@ const talukaModel: TalukaModel = {
         var url: string = "/admin/taluka",
           callType = "";
 
-        console.log("addOrUpdateTaluka talukaName: ", talukaName);
-
         formData.append("talukaName", talukaName ?? "");
         formData.append("isActive", String(isActive ?? false));
 
@@ -75,7 +73,6 @@ const talukaModel: TalukaModel = {
           formData: formData,
           callType: id ? "p" : callType,
         });
-        console.log("adding/updating res: ", response);
         if (response.ok) {
           showToast(`${id ? "Updated" : "Added"}!`, "s");
         } else {
@@ -95,7 +92,6 @@ const talukaModel: TalukaModel = {
         callType: "d",
         formData: new FormData(),
       });
-      console.log("delete taluka res: ", response);
       actions.setLoading(false);
       if (response.ok) {
         showToast("Deleted!", "s");

@@ -63,7 +63,6 @@ const videoModel: VideoModel = {
         throw await response.json();
       }
       const resJson = await response.json();
-      console.log("video resJson: ", resJson);
 
       if ("videos" in resJson) {
         getState().videos = [

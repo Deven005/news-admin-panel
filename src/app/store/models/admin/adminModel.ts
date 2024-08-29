@@ -172,8 +172,6 @@ const adminModel: AdminModel = {
         (admin) => admin.id == id
       )[0];
 
-      console.log("currentAdmin: ", currentAdmin);
-
       const response = await doApiCall({
         url: `/admin/admin/${id}?uid=${currentAdmin.userUid}`,
         callType: "d",

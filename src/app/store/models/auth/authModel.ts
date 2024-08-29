@@ -64,7 +64,6 @@ const authModel: AuthModel = {
   }),
   loginSuccess: action((state, payload) => {
     const { claims, token, user } = payload;
-    console.log("claims: ", claims);
     state.user = user;
     state.isAdmin = !!claims.isAdmin;
     state.isReporter = !!claims.isReporter;

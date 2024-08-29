@@ -77,7 +77,6 @@ function AddUpdateReporterForm({
   };
 
   const handleAddUpdateReporter = async (event: ReporterFormType) => {
-    console.log("event: ", event);
     try {
       setLoading(true);
       const { reporterFirstName, reporterLastName, reporterEmail } = event;
@@ -85,8 +84,6 @@ function AddUpdateReporterForm({
       addUpdateReporterForm.append("reporterFirstName", reporterFirstName);
       addUpdateReporterForm.append("reporterLastName", reporterLastName);
       addUpdateReporterForm.append("reporterEmail", reporterEmail);
-
-      console.log("isEditReporter: ", isEditReporter);
 
       const response = await doApiCall({
         url: `/reporter${
@@ -96,10 +93,7 @@ function AddUpdateReporterForm({
         callType: `${isEditReporter ? "p" : ""}`,
       });
 
-      console.log(
-        `${isEditReporter ? "Update" : "Add"} reporter response: `,
-        response
-      );
+      console.log(`${isEditReporter ? "Update" : "Add"} reporter response: `);
       showToast(`${isEditReporter ? "Update" : "Add"} reporter is done!`, "s");
       onModalCancelHandler();
     } catch (error) {

@@ -45,8 +45,6 @@ interface HistoricalPlaceModel {
 const historicalPlaceModel: HistoricalPlaceModel = {
   historicalPlaces: [],
   deleteHistoricalPlace: thunk(async (actions, id) => {
-    console.log("delete place ID: ", id);
-
     try {
       actions.setLoading(true);
       const response = await doApiCall({
@@ -54,7 +52,6 @@ const historicalPlaceModel: HistoricalPlaceModel = {
         callType: "d",
         formData: new FormData(),
       });
-      console.log("place delete res: ", response);
       if (!response.ok) {
         throw new Error(response.statusText);
       }

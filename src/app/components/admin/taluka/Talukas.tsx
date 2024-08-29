@@ -26,7 +26,6 @@ const Talukas = () => {
     id: string
   ) => {
     e.stopPropagation();
-    console.log(`Delete taluka with id: ${id}`);
     try {
       await deleteTaluka(id);
     } catch (error) {

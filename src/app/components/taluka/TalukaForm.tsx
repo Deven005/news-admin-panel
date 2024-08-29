@@ -46,7 +46,6 @@ const TalukaForm = ({ taluka }: TalukaFormProps) => {
     e.preventDefault();
     try {
       setLoading(true);
-      console.log("taluka?.id: ", taluka?.id);
       await addOrUpdateTaluka({
         id: taluka?.id,
         talukaName: talukaName,
