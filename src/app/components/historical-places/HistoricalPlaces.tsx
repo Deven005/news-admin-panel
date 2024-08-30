@@ -1,7 +1,6 @@
 "use client";
 import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect } from "react";
 import Loading from "@/app/components/Loading";
 import { HistoricalPlace } from "@/app/store/models/historical-places/historicalPlacesModel";
 import { showToast } from "@/app/Utils/Utils";
@@ -18,9 +17,8 @@ const HistoricalPlaces = () => {
 
   const pathname = usePathname();
 
-  const handleEditPlaceClick = (place: HistoricalPlace) => {
+  const handleEditPlaceClick = (place: HistoricalPlace) =>
     router.push(`${pathname}/historical-places/${place.placeID}`);
-  };
 
   const handleDeletePlaceClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -87,8 +85,10 @@ const HistoricalPlaces = () => {
                     </div>
                   </td>
                   <td>{place.placeName}</td>
-                  <td className="truncate">
-                    {place.placeDescription || "No description"}
+                  <td className="max-w-xs">
+                    <p className="line-clamp-3">
+                      {place.placeDescription || "No description"}
+                    </p>
                   </td>
                   <td>
                     {new Date(
@@ -115,7 +115,6 @@ const HistoricalPlaces = () => {
                     <button
                       className="btn btn-outline btn-error"
                       onClick={(e) => handleDeletePlaceClick(e, place)}
-                      // style={{ color: "white" }}
                     >
                       Delete
                     </button>
