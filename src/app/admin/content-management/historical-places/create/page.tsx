@@ -2,11 +2,7 @@ import HistoricalPlacesAddEdit from "@/app/components/historical-places/create-o
 import React from "react";
 
 const HistoricalPlacesCreate = () => {
-  return (
-    <>
-      <HistoricalPlacesAddEdit />
-    </>
-  );
+  return <HistoricalPlacesAddEdit />;
 };
 
 export default HistoricalPlacesCreate;

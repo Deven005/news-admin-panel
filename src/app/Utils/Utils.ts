@@ -46,6 +46,7 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
   // "https://news-backend-573329204030.asia-south1.run.app/api";
 
   // https://news-admin-panel-45h4p5l4ua-el.a.run.app/auth/login
+  // https://news-admin-panel-573329204030.asia-south1.run.app/auth/login
 
   // http://localhost:8080/api
   // API_URL

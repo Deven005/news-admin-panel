@@ -46,7 +46,13 @@ const Profile = () => {
           <div className="flex items-center">
             <span className="font-medium text-gray-600 w-40">Created At:</span>
             <span className="text-gray-800">
-              {formatDate(user.metadata?.creationTime)}
+              {formatDate(
+                currentAdmin
+                  ? currentAdmin?.userCreationTime
+                  : currentReporter
+                  ? currentReporter?.reporterCreatedAt
+                  : ""
+              )}
             </span>
           </div>
           {currentReporter !== undefined && (

@@ -87,7 +87,9 @@ const HistoricalPlaces = () => {
                     </div>
                   </td>
                   <td>{place.placeName}</td>
-                  <td>{place.placeDescription || "No description"}</td>
+                  <td className="truncate">
+                    {place.placeDescription || "No description"}
+                  </td>
                   <td>
                     {new Date(
                       place.placeCreatedAt.seconds * 1000 +
