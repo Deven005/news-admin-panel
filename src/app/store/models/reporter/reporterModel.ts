@@ -1,5 +1,9 @@
 import { firestore } from "@/app/firebase/config";
-import { reporterCollectionName } from "@/app/Utils/Utils";
+import {
+  doApiCall,
+  reporterCollectionName,
+  showToast,
+} from "@/app/Utils/Utils";
 import { action, Action, thunk, Thunk } from "easy-peasy";
 import {
   collection,
@@ -29,7 +33,7 @@ export interface ReporterModel {
   setLoading: Action<ReporterModel, boolean>;
   // addReporter: Action<ReporterModel, Reporter>;
   // updateReporter: Action<ReporterModel, UpdateReporter>;
-  // deleteReporter: Action<ReporterModel, number>;
+  deleteReporter: Thunk<ReporterModel, string>;
   //   token: string;
   //   user: User | undefined;
   //   login: Thunk<AuthModel, LoginInputModel, Promise<void>>;
@@ -42,6 +46,26 @@ export interface ReporterModel {
 const reporterModel: ReporterModel = {
   isLoading: false,
   reporters: [],
+  deleteReporter: thunk(async (actions, reporterID) => {
+    try {
+      actions.setLoading(true);
+      const response = await doApiCall({
+        url: `/reporter/${reporterID}?uid=${reporterID}`,
+        callType: "d",
+      });
+      if (!response.ok) {
+        throw new Error(await response.json());
+      }
+      showToast(
+        (await response.json())["message"] ?? "Reporter is removed!",
+        "s"
+      );
+    } catch (error: any) {
+      showToast(error["message"] ?? "Something is wrong!", "e");
+    } finally {
+      actions.setLoading(false);
+    }
+  }),
   listenToReporters: thunk(async (_actions, _, { getState }) => {
     const unsubscribe = onSnapshot(
       collection(firestore, reporterCollectionName),

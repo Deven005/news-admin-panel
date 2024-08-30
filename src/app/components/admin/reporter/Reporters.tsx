@@ -1,8 +1,8 @@
 "use client";
 import AddUpdateReporterForm from "@/app/components/admin/reporter/AddUpdateReporterForm";
-import { useStoreState } from "@/app/hooks/hooks";
+import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { Reporter } from "@/app/store/models/reporter/reporterModel";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import Loading from "../../Loading";
 
 function Reporters() {
@@ -10,42 +10,9 @@ function Reporters() {
   const [isEditReporter, setIsEditReporter] = useState(false);
   const token = useStoreState((state) => state.auth.token);
   const { reporters, isLoading } = useStoreState((state) => state.reporter);
+  const { deleteReporter } = useStoreActions((actions) => actions.reporter);
   const [reporterToEditOrDelete, setReporterToEditOrDelete] =
     useState<Reporter>();
-
-  useEffect(() => {
-    // const unsubscribe = onSnapshot(
-    //   collection(firestore, reporterCollectionName),
-    //   async (snapshot) => {
-    //     setIsLoading(true);
-    //     snapshot.docChanges().forEach((change) => {
-    //       var changedReporterIndex: number = reporters.findIndex(
-    //         (val) => val.reporterID == change.doc.id
-    //       );
-    //       const reporterData = change.doc.data();
-    //       console.log("changedReporterIndex: ", changedReporterIndex);
-    //       if (change.type === "added" && changedReporterIndex == -1) {
-    //         addReporter({
-    //           reporterID: reporterData["reporterID"] ?? change.doc.id,
-    //           reporterFirstName: reporterData["reporterFirstName"],
-    //           reporterLastName: reporterData["reporterLastName"],
-    //           reporterEmail: reporterData["reporterEmail"],
-    //         } as Reporter);
-    //       } else if (change.type === "modified") {
-    //         if (changedReporterIndex !== -1) {
-    //           // Handle modified document
-    //           updateReporter({ changedReporterIndex, reporterData });
-    //         }
-    //       } else if (change.type === "removed" && changedReporterIndex !== -1) {
-    //         // Handle removed document
-    //         deleteReporter(changedReporterIndex);
-    //       }
-    //     });
-    //     setIsLoading(false);
-    //   }
-    // );
-    // return () => unsubscribe();
-  }, []);
 
   function editReporterClickHandler(reporter: Reporter) {
     setReporterToEditOrDelete(reporter);
@@ -105,17 +72,15 @@ function Reporters() {
                       >
                         Edit
                       </button>
+                      <button
+                        className="btn btn-outline btn-error ml-3"
+                        data-te-ripple-init
+                        data-te-ripple-color="dark"
+                        onClick={() => deleteReporter(reporter.reporterID)}
+                      >
+                        Delete
+                      </button>
                     </td>
-                    {/* <td>
-                          <button
-                            className="btn btn-outline btn-error"
-                            data-te-ripple-init
-                            data-te-ripple-color="dark"
-                            // onClick={() => deleteCategoryClickHandler(cat)}
-                          >
-                            Delete
-                          </button>
-                        </td> */}
                   </tr>
                 );
               })}
