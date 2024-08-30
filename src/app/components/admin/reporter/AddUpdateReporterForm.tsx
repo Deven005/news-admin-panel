@@ -2,6 +2,7 @@ import { useStoreActions, useStoreState } from "@/app/hooks/hooks";
 import { Reporter } from "@/app/store/models/reporter/reporterModel";
 import { doApiCall, showToast } from "@/app/Utils/Utils";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
@@ -60,6 +61,7 @@ function AddUpdateReporterForm({
   } = useForm({
     resolver: yupResolver(validateSchema),
   });
+  const router = useRouter();
 
   useEffect(() => {
     if (isEditReporter && reporterToEditOrDelete) {
@@ -67,7 +69,7 @@ function AddUpdateReporterForm({
       setValue("reporterLastName", reporterToEditOrDelete.reporterLastName);
       setValue("reporterEmail", reporterToEditOrDelete.reporterEmail);
     }
-  }, []);
+  }, [isEditReporter, reporterToEditOrDelete]);
 
   const onModalCancelHandler = () => {
     setLoading(false);
@@ -83,7 +85,9 @@ function AddUpdateReporterForm({
       const addUpdateReporterForm = new FormData();
       addUpdateReporterForm.append("reporterFirstName", reporterFirstName);
       addUpdateReporterForm.append("reporterLastName", reporterLastName);
-      addUpdateReporterForm.append("reporterEmail", reporterEmail);
+      if (!isEditReporter) {
+        addUpdateReporterForm.append("reporterEmail", reporterEmail);
+      }
 
       const response = await doApiCall({
         url: `/reporter${
@@ -93,13 +97,22 @@ function AddUpdateReporterForm({
         callType: `${isEditReporter ? "p" : ""}`,
       });
 
+      if (!response.ok) {
+        throw new Error(await response.json());
+      }
       console.log(`${isEditReporter ? "Update" : "Add"} reporter response: `);
-      showToast(`${isEditReporter ? "Update" : "Add"} reporter is done!`, "s");
+      showToast(
+        (await response.json())["message"] ??
+          `${isEditReporter ? "Update" : "Add"} reporter is done!`,
+        "s"
+      );
+      router.refresh();
       onModalCancelHandler();
-    } catch (error) {
+    } catch (error: any) {
       console.log("add reporter error: ", error);
       showToast(
-        `${isEditReporter ? "Update" : "Add"} reporter is not done!`,
+        error["message"] ??
+          `${isEditReporter ? "Update" : "Add"} reporter is not done!`,
         "e"
       );
     } finally {
