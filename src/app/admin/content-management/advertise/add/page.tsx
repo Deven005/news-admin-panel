@@ -3,11 +3,13 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { doApiCall, showToast } from "@/app/Utils/Utils";
+import InputField from "@/app/components/InputField";
 
 const AddAdvertise = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [url, setUrl] = useState<string>(""); // State to manage the URL input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
 
@@ -37,6 +39,10 @@ const AddAdvertise = () => {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
+      if (url) {
+        formData.append("url", url);
+      }
+
       const response = await doApiCall({
         url: "/admin/advertises",
         callType: "",
@@ -44,14 +50,20 @@ const AddAdvertise = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add advertisement");
+        throw new Error(
+          (await response.json()) ?? "Failed to add advertisement"
+        );
       }
 
-      showToast("Advertisement added successfully!", "s");
+      showToast(
+        (await response.json())["message"] ??
+          "Advertisement added successfully!",
+        "s"
+      );
       router.back();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding advertisement:", error);
-      showToast("Failed to add advertisement.", "e");
+      showToast(error["message"] ?? "Failed to add advertisement.", "e");
     } finally {
       setIsLoading(false);
     }
@@ -100,6 +112,13 @@ const AddAdvertise = () => {
             onChange={handleFileChange}
             ref={fileInputRef}
             className="file-input file-input-bordered w-full max-w-xs mt-2"
+          />
+
+          <InputField
+            type="text"
+            label={"URL (optional)"}
+            placeholder={"Enter URL to redirect"}
+            onChange={(e) => setUrl(e.target.value)}
           />
 
           <button

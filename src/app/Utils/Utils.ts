@@ -43,16 +43,21 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
   );
 
   // "https://news-backend-45h4p5l4ua-el.a.run.app/api";
+  // "https://news-backend-573329204030.asia-south1.run.app/api";
+
   // https://news-admin-panel-45h4p5l4ua-el.a.run.app/auth/login
 
   // http://localhost:8080/api
   // API_URL
 
-  return fetch(`https://news-backend-45h4p5l4ua-el.a.run.app/api${url}`, {
-    method: methodType,
-    body: formData,
-    headers: headers,
-  });
+  return fetch(
+    `https://news-backend-573329204030.asia-south1.run.app/api${url}`,
+    {
+      method: methodType,
+      body: formData,
+      headers: headers,
+    }
+  );
 }
 
 const formatDate = (date: Timestamp | Date | string | undefined) => {

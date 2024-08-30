@@ -18,8 +18,7 @@ const Profile = () => {
   return !isAuthenticated ||
     isLoading ||
     user === undefined ||
-    currentReporter === undefined ||
-    currentAdmin === undefined ? (
+    (currentReporter === undefined && currentAdmin === undefined) ? (
     <Loading />
   ) : (
     <div className="max-w-5xl mx-auto p-6 bg-white rounded-lg shadow-md space-y-10 pt-6">
