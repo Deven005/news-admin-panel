@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import 'animate.css';
+@import "animate.css";
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -71,7 +71,7 @@ td {
 
 .line-clamp-4 {
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -127,7 +127,7 @@ Button styles .btn-primary {
   @apply bg-blue-500 text-white hover:bg-blue-600;
 }
 
-.btn-error {
+Button styles .btn-error {
   @apply bg-red-500 text-white hover:bg-red-600;
 }
 
