@@ -16,6 +16,7 @@ const News = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTaluka, setSelectedTaluka] = useState("all");
+  const [sortBy, setSortBy] = useState<string>("timestampCreatedAt"); // Sorting criteria
   const [filteredNews, setFilteredNews] = useState<NewsType[]>([]);
 
   useEffect(() => {
@@ -31,8 +32,27 @@ const News = () => {
       );
     }
 
+    filtered = filtered.sort((a, b) => {
+      if (sortBy === "timestampCreatedAt") {
+        // Convert Timestamp objects to Date for comparison
+        const aDate = a.timestampCreatedAt.toDate();
+        const bDate = b.timestampCreatedAt.toDate();
+        return bDate.getTime() - aDate.getTime(); // Descending order (latest first)
+      } else if (sortBy === "likes") {
+        return (Number(b.likes) || 0) - (Number(a.likes) || 0); // Descending order (most likes first)
+      } else if (sortBy === "dislikes") {
+        return (Number(b.dislikes) || 0) - (Number(a.dislikes) || 0); // Descending order (most dislikes first)
+      } else if (sortBy === "views") {
+        return (Number(b.views) || 0) - (Number(a.views) || 0); // Descending order (most views first)
+      } else if (sortBy === "shares") {
+        return (Number(b.shares) || 0) - (Number(a.shares) || 0); // Descending order (most shares first)
+      } else {
+        return 0; // No sorting
+      }
+    });
+
     setFilteredNews(filtered);
-  }, [news, searchTerm, selectedTaluka]);
+  }, [news, searchTerm, selectedTaluka, sortBy]);
 
   const handleEditNewsClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -116,66 +136,76 @@ const News = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-          {filteredNews.map((item, index) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 hover:shadow-lg"
-              style={{
-                animation: `slideIn ${index * 0.1 + 0.3}s ease-out`,
-              }}
-              onClick={() => viewNewsHandler(item)}
-            >
-              <div className="relative overflow-hidden rounded-lg shadow-sm mb-4">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-48 object-cover"
-                  height={200}
-                  width={200}
-                  priority={true}
-                />
+        <>
+          <select onChange={(e) => setSortBy(e.target.value)} value={sortBy}>
+            <option value="timestampCreatedAt">Newest First</option>
+            <option value="likes">Most Likes</option>
+            <option value="dislikes">Most Dislikes</option>
+            <option value="views">Most Views</option>
+            <option value="shares">Most Shares</option>
+          </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            {filteredNews.map((item, index) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-lg shadow-md p-4 transition-transform transform hover:scale-105 hover:shadow-lg"
+                style={{
+                  animation: `slideIn ${index * 0.1 + 0.3}s ease-out`,
+                }}
+                onClick={() => viewNewsHandler(item)}
+              >
+                <div className="relative overflow-hidden rounded-lg shadow-sm mb-4">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-48 object-cover"
+                    height={200}
+                    width={200}
+                    priority={true}
+                  />
+                </div>
+                <h2 className="text-lg font-semibold mb-2">{item.title}</h2>
+                <p className="text-gray-600 line-clamp-3 mb-4">
+                  {item.description}
+                </p>
+                <div className="text-sm text-gray-700 mb-4">
+                  <span className="font-semibold">Likes:</span> {item.likes} |{" "}
+                  <span className="font-semibold">Dislikes:</span>{" "}
+                  {item.dislikes ?? "0"} |{" "}
+                  <span className="font-semibold">Views:</span> {item.views}
+                </div>
+                <div className="text-sm text-gray-700 mb-4">
+                  <span className="font-semibold">Created At:</span>{" "}
+                  {new Date(
+                    item.timestampCreatedAt.seconds * 1000 +
+                      item.timestampCreatedAt.nanoseconds / 1e6
+                  ).toLocaleString("en-US")}
+                </div>
+                <div className="text-sm text-gray-700 mb-4">
+                  <span className="font-semibold">Updated At:</span>{" "}
+                  {new Date(
+                    item.timestampUpdatedAt.seconds * 1000 +
+                      item.timestampUpdatedAt.nanoseconds / 1e6
+                  ).toLocaleString("en-US")}
+                </div>
+                <div className="flex justify-between">
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={(e) => handleEditNewsClick(e, item)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-sm btn-error"
+                    onClick={(e) => handleDeleteNewsClick(e, item)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-              <h2 className="text-lg font-semibold mb-2">{item.title}</h2>
-              <p className="text-gray-600 line-clamp-3 mb-4">
-                {item.description}
-              </p>
-              <div className="text-sm text-gray-700 mb-4">
-                <span className="font-semibold">Likes:</span> {item.likes} |{" "}
-                <span className="font-semibold">Dislikes:</span> {item.dislikes}{" "}
-                | <span className="font-semibold">Views:</span> {item.views}
-              </div>
-              <div className="text-sm text-gray-700 mb-4">
-                <span className="font-semibold">Created At:</span>{" "}
-                {new Date(
-                  item.timestampCreatedAt.seconds * 1000 +
-                    item.timestampCreatedAt.nanoseconds / 1e6
-                ).toLocaleString("en-US")}
-              </div>
-              <div className="text-sm text-gray-700 mb-4">
-                <span className="font-semibold">Updated At:</span>{" "}
-                {new Date(
-                  item.timestampUpdatedAt.seconds * 1000 +
-                    item.timestampUpdatedAt.nanoseconds / 1e6
-                ).toLocaleString("en-US")}
-              </div>
-              <div className="flex justify-between">
-                <button
-                  className="btn btn-sm btn-primary"
-                  onClick={(e) => handleEditNewsClick(e, item)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="btn btn-sm btn-error"
-                  onClick={(e) => handleDeleteNewsClick(e, item)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
     </>
   );
