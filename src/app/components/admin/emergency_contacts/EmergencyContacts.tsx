@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -8,6 +7,7 @@ import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import InputField from "../../InputField";
+import Loading from "../../Loading";
 
 // Define schema for form validation
 const ContactSchema = Yup.object().shape({
@@ -17,7 +17,6 @@ const ContactSchema = Yup.object().shape({
 
 const NewGroupSchema = Yup.object().shape({
   groupTitle: Yup.string().required("Group title is required"),
-  groupImage: Yup.string().required("Group image URL is required"),
 });
 
 interface FormData {
@@ -27,11 +26,10 @@ interface FormData {
 
 interface NewGroupData {
   groupTitle: string;
-  groupImage: string;
 }
 
 const EmergencyContacts = () => {
-  const { emergencyContacts } = useStoreState(
+  const { emergencyContacts, loading } = useStoreState(
     (state) => state.emergencyContacts
   );
   const {
@@ -40,6 +38,7 @@ const EmergencyContacts = () => {
     addContact,
     addEmergencyContactGroup,
     deleteEmergencyContactGroup,
+    updateEmergencyContactGroup,
   } = useStoreActions((actions) => actions.emergencyContacts);
 
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -49,6 +48,9 @@ const EmergencyContacts = () => {
   const [addingContact, setAddingContact] = useState<boolean>(false);
   const [currentGroupId, setCurrentGroupId] = useState<string | null>(null);
   const [addingGroup, setAddingGroup] = useState<boolean>(false);
+  const [groupImageFile, setGroupImageFile] = useState<File | null>(null);
+  const [groupImageUrl, setGroupImageUrl] = useState<string | null>(null);
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 
   const {
     register: registerContact,
@@ -63,6 +65,7 @@ const EmergencyContacts = () => {
   const {
     register: registerGroup,
     handleSubmit: handleSubmitGroup,
+    setValue: setValueGroup,
     reset: resetGroup,
     formState: { errors: groupErrors },
   } = useForm<NewGroupData>({
@@ -92,6 +95,22 @@ const EmergencyContacts = () => {
     resetContact,
   ]);
 
+  useEffect(() => {
+    if (editingGroupId) {
+      const contactGroup = emergencyContacts.find(
+        (group) => group.id === editingGroupId
+      );
+      if (contactGroup) {
+        setGroupImageUrl(contactGroup.contactImg || null);
+        resetGroup();
+        setValueGroup("groupTitle", contactGroup.contactTitle);
+      }
+    } else {
+      setGroupImageUrl(null);
+      resetGroup();
+    }
+  }, [editingGroupId, emergencyContacts, resetGroup, setValueGroup]);
+
   const handleEditClick = (groupId: string, contactIndex: number) => {
     setEditingIndex(contactIndex);
     setSelectedContactGroup(groupId);
@@ -114,6 +133,7 @@ const EmergencyContacts = () => {
     setAddingContact(true);
     setEditingIndex(null);
     setCurrentGroupId(groupId);
+    handleCancelGroupClick();
   };
 
   const handleAddSaveClick = async (data: FormData) => {
@@ -158,12 +178,19 @@ const EmergencyContacts = () => {
 
   const handleAddGroupClick = () => {
     setAddingGroup(true);
+    resetAdding();
+    setGroupImageFile(null);
+    setGroupImageUrl(null);
   };
 
   const handleAddGroupSaveClick = async (data: NewGroupData) => {
+    if (groupImageFile == null) {
+      alert("Select an image file!");
+      return;
+    }
     await addEmergencyContactGroup({
       title: data.groupTitle,
-      contactImg: data.groupImage,
+      contactImg: groupImageFile,
     });
     setAddingGroup(false);
     resetGroup();
@@ -174,54 +201,194 @@ const EmergencyContacts = () => {
     resetGroup();
   };
 
-  return (
-    <div className="pt-4 md:pt-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-3">
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    groupId?: string
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          setGroupImageUrl(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+      setGroupImageFile(file);
+
+      try {
+        if (!groupId) {
+          return;
+        }
+        // Assuming `updateEmergencyContactGroup` is available from props or context
+        await updateEmergencyContactGroup({
+          groupId,
+          title:
+            emergencyContacts.find((group) => group.id === groupId)
+              ?.contactTitle || "",
+          contactImg: file,
+        });
+        // showToast("Image updated successfully!", "s");
+      } catch (error) {
+        // showToast("Error updating image!", "e");
+      }
+    }
+  };
+
+  const handleUpdateGroupClick = (groupId: string) => {
+    const contactGroup = emergencyContacts.find(
+      (group) => group.id === groupId
+    );
+    if (contactGroup) {
+      setGroupImageUrl(contactGroup.contactImg || null);
+      setGroupImageFile(null);
+      setEditingGroupId(groupId);
+      setAddingGroup(true);
+    }
+  };
+
+  const handleUpdateGroupSaveClick = async (data: NewGroupData) => {
+    if (editingGroupId) {
+      await updateEmergencyContactGroup({
+        groupId: editingGroupId,
+        title: data.groupTitle,
+        contactImg: groupImageFile,
+      });
+      setEditingGroupId(null);
+      setAddingGroup(false);
+      resetGroup();
+    }
+  };
+
+  return loading ? (
+    <Loading />
+  ) : (
+    <div className="pt-4 md:pt-6 max-w-6xl mx-auto px-4">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Emergency Contacts</h1>
         {!addingGroup && (
           <button
             onClick={handleAddGroupClick}
-            className="btn btn-primary px-2 py-1 rounded-lg text-white bg-blue-500 hover:bg-blue-600"
+            className="btn btn-primary px-4 py-2 rounded-lg text-white bg-blue-500 hover:bg-blue-600"
           >
             + Add New Group
           </button>
         )}
       </div>
 
-      {/* Add New Group Section */}
+      {/* Add/Edit Group Section */}
       {addingGroup && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="bg-white p-4 rounded-lg shadow-md mb-6"
+          className="bg-white p-6 rounded-lg shadow-lg mb-6"
         >
-          <h2 className="text-xl font-semibold mb-4">Add New Contact Group</h2>
-          <form onSubmit={handleSubmitGroup(handleAddGroupSaveClick)}>
+          <h2 className="text-xl font-semibold mb-4">
+            {editingGroupId ? "Update Contact Group" : "Add New Contact Group"}
+          </h2>
+          <form
+            onSubmit={handleSubmitGroup(
+              editingGroupId
+                ? handleUpdateGroupSaveClick
+                : handleAddGroupSaveClick
+            )}
+          >
+            <div className="mb-4">
+              <label className="block text-gray-700 font-semibold mb-2">
+                Group Title
+              </label>
+              <input
+                type="text"
+                {...registerGroup("groupTitle")}
+                placeholder="Enter group title"
+                className="border border-gray-300 rounded-lg px-4 py-2 w-full"
+              />
+              {groupErrors.groupTitle && (
+                <p className="text-red-500 text-sm mt-1">
+                  {groupErrors.groupTitle.message}
+                </p>
+              )}
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-semibold mb-2">
+                Group Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="border border-gray-300 rounded-lg px-4 py-2 w-full"
+              />
+              {groupImageUrl && (
+                <Image
+                  src={groupImageUrl}
+                  alt="Group Image"
+                  width={100}
+                  height={100}
+                  className="mt-4 rounded-lg"
+                />
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="submit"
+                className="btn btn-success px-4 py-2 rounded-lg text-white bg-green-500 hover:bg-green-600"
+              >
+                {editingGroupId ? "Update Group" : "Add Group"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelGroupClick}
+                className="btn btn-secondary px-4 py-2 rounded-lg text-white bg-gray-500 hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      )}
+
+      {/* Add/Edit Contact Section */}
+      {(addingContact || editingIndex !== null) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white p-6 rounded-lg shadow-lg mb-6"
+        >
+          <h2 className="text-xl font-semibold mb-4">
+            {editingIndex !== null ? "Edit Contact" : "Add New Contact"}
+          </h2>
+          <form
+            onSubmit={handleSubmitContact(
+              editingIndex !== null ? handleSaveClick : handleAddSaveClick
+            )}
+          >
             <InputField
               type="text"
-              label="Group Title"
-              placeholder="Enter group title"
-              {...registerGroup("groupTitle")}
-              error={groupErrors.groupTitle}
+              label="Title"
+              placeholder="Enter title"
+              {...registerContact("title")}
+              error={contactErrors.title}
             />
             <InputField
               type="text"
-              label="Group Image URL"
-              placeholder="Enter image URL"
-              {...registerGroup("groupImage")}
-              error={groupErrors.groupImage}
+              label="Contact"
+              placeholder="Enter contact"
+              {...registerContact("contact")}
+              error={contactErrors.contact}
             />
             <div className="flex justify-end gap-2 mt-4">
               <button
                 type="submit"
                 className="btn btn-success px-4 py-2 rounded-lg text-white bg-green-500 hover:bg-green-600"
               >
-                Add Group
+                {editingIndex !== null ? "Save" : "Add Contact"}
               </button>
               <button
                 type="button"
-                onClick={handleCancelGroupClick}
+                onClick={handleCancelClick}
                 className="btn btn-secondary px-4 py-2 rounded-lg text-white bg-gray-500 hover:bg-gray-600"
               >
                 Cancel
@@ -271,30 +438,46 @@ const EmergencyContacts = () => {
           {emergencyContacts.map((contactGroup) => (
             <motion.div
               key={contactGroup.id}
-              className="card shadow-md p-4 bg-white rounded-lg transition-transform transform hover:scale-105"
+              className="bg-white shadow-lg p-4 rounded-lg mb-4 transition-transform transform hover:scale-105"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
-                  <Image
-                    src={contactGroup.contactImg || "/default-img.jpg"}
-                    alt={contactGroup.contactTitle}
-                    width={50}
-                    height={50}
-                    className="w-12 h-12 rounded-full"
-                  />
+                  <div>
+                    <input
+                      type="file"
+                      id={`fileInput-${contactGroup.id}`}
+                      style={{ display: "none" }}
+                      onChange={(e) => handleImageChange(e, contactGroup.id)}
+                    />
+                    <label htmlFor={`fileInput-${contactGroup.id}`}>
+                      <Image
+                        src={contactGroup.contactImg || "/default-img.jpg"}
+                        alt={contactGroup.contactTitle}
+                        width={60}
+                        height={60}
+                        className="w-16 h-16 rounded-full cursor-pointer"
+                      />
+                    </label>
+                  </div>
                   <h2 className="text-xl font-semibold text-gray-800">
                     {contactGroup.contactTitle}
                   </h2>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleAddClick(contactGroup.id)}
                     className="btn btn-primary px-3 py-1 rounded-lg text-white bg-blue-500 hover:bg-blue-600"
                   >
                     Add Contact
+                  </button>
+                  <button
+                    onClick={() => handleUpdateGroupClick(contactGroup.id)}
+                    className="btn btn-secondary px-3 py-1 rounded-lg text-white bg-gray-500 hover:bg-gray-600"
+                  >
+                    Update Group
                   </button>
                   <button
                     onClick={() => handleDeleteGroupClick(contactGroup.id)}
@@ -338,55 +521,6 @@ const EmergencyContacts = () => {
             </motion.div>
           ))}
         </div>
-      )}
-
-      {/* Add/Edit Contact Section */}
-      {(addingContact || editingIndex !== null) && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white p-4 rounded-lg shadow-md mt-6"
-        >
-          <h2 className="text-xl font-semibold mb-4">
-            {editingIndex !== null ? "Edit Contact" : "Add New Contact"}
-          </h2>
-          <form
-            onSubmit={handleSubmitContact(
-              editingIndex !== null ? handleSaveClick : handleAddSaveClick
-            )}
-          >
-            <InputField
-              type="text"
-              label="Title"
-              placeholder="Enter title"
-              {...registerContact("title")}
-              error={contactErrors.title}
-            />
-            <InputField
-              type="text"
-              label="Contact"
-              placeholder="Enter contact"
-              {...registerContact("contact")}
-              error={contactErrors.contact}
-            />
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                type="submit"
-                className="btn btn-success px-4 py-2 rounded-lg text-white bg-green-500 hover:bg-green-600"
-              >
-                {editingIndex !== null ? "Save" : "Add Contact"}
-              </button>
-              <button
-                type="button"
-                onClick={handleCancelClick}
-                className="btn btn-secondary px-4 py-2 rounded-lg text-white bg-gray-500 hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </motion.div>
       )}
     </div>
   );

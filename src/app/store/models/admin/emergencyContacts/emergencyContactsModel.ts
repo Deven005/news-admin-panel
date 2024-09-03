@@ -1,4 +1,4 @@
-import { firestore } from "@/app/firebase/config";
+import { firestore, storage } from "@/app/firebase/config";
 import { showToast } from "@/app/Utils/Utils";
 import { thunk, action, Action, Thunk } from "easy-peasy";
 import {
@@ -7,8 +7,9 @@ import {
   updateDoc,
   doc,
   deleteDoc,
-  addDoc,
+  setDoc,
 } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 // Define the interface for a contact
 interface Contact {
@@ -26,6 +27,8 @@ interface EmergencyContact {
 
 // Define the model interface
 interface EmergencyContactsModel {
+  loading: boolean;
+  setLoading: Action<EmergencyContactsModel, boolean>;
   emergencyContacts: EmergencyContact[];
   listenEmergencyContacts: Thunk<EmergencyContactsModel>;
   updateContact: Thunk<
@@ -42,7 +45,11 @@ interface EmergencyContactsModel {
   >;
   addEmergencyContactGroup: Thunk<
     EmergencyContactsModel,
-    { title: string; contactImg: string }
+    { title: string; contactImg: File }
+  >;
+  updateEmergencyContactGroup: Thunk<
+    EmergencyContactsModel,
+    { groupId: string; title: string; contactImg: File | null }
   >;
   deleteEmergencyContactGroup: Thunk<
     EmergencyContactsModel,
@@ -52,51 +59,96 @@ interface EmergencyContactsModel {
 }
 
 const emergencyContactsModel: EmergencyContactsModel = {
+  loading: false,
   emergencyContacts: [],
 
   addEmergencyContactGroup: thunk(
     async (actions, { title, contactImg }, { getState }) => {
       try {
-        const newGroup = {
-          contactTitle: title,
-          contactImg,
-          contacts: [],
-        };
-        const docRef = await addDoc(
-          collection(firestore, "emergencyContacts"),
-          newGroup
+        actions.setLoading(true);
+        const newGroupRef = doc(collection(firestore, "emergencyContacts"));
+
+        const storageRef = ref(
+          storage,
+          `emergencyContactGroup/${newGroupRef.id}`
         );
+        await uploadBytes(storageRef, contactImg, {
+          customMetadata: {
+            size: contactImg.size.toString(),
+            name: contactImg.name,
+          },
+        });
 
-        // Update state immediately
-        // actions.setEmergencyContacts([
-        //   ...getState().emergencyContacts,
-        //   { id: docRef.id, ...newGroup },
-        // ]);
-
+        await setDoc(newGroupRef, {
+          contactTitle: title,
+          contactImg: await getDownloadURL(storageRef),
+          contacts: [],
+        });
         showToast("Group added successfully!", "s");
       } catch (error) {
         showToast("Error adding group!", "e");
+      } finally {
+        actions.setLoading(false);
       }
     }
   ),
 
-  listenEmergencyContacts: thunk((actions) => {
-    const unsubscribe = onSnapshot(
-      collection(firestore, "emergencyContacts"),
-      (snapshot) => {
-        const updatedContacts = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as EmergencyContact[];
-        actions.setEmergencyContacts(updatedContacts);
+  updateEmergencyContactGroup: thunk(
+    async (actions, { groupId, title, contactImg }, { getState }) => {
+      try {
+        actions.setLoading(true);
+
+        // Prepare the document reference
+        const groupDocRef = doc(firestore, "emergencyContacts", groupId);
+        let newImageUrl = null;
+
+        // If a new image is provided, upload it and get the URL
+        if (contactImg) {
+          const storageRef = ref(storage, `emergencyContactGroup/${groupId}`);
+          await uploadBytes(storageRef, contactImg, {
+            customMetadata: {
+              size: contactImg.size.toString(),
+              name: contactImg.name,
+            },
+          });
+          newImageUrl = await getDownloadURL(storageRef);
+        }
+
+        // Update the Firestore document with new title and/or image URL
+        await updateDoc(groupDocRef, {
+          contactTitle: title,
+          ...(newImageUrl && { contactImg: newImageUrl }),
+        });
+
+        // // Update state with new data
+        // const updatedGroup = {
+        //   id: groupId,
+        //   contactTitle: title,
+        //   contactImg:
+        //     newImageUrl || (await getDoc(groupDocRef)).data().contactImg,
+        //   contacts: (await getDoc(groupDocRef)).data().contacts,
+        // };
+
+        // actions.setEmergencyContacts(
+        //   getState().emergencyContacts.map((cg) =>
+        //     cg.id === groupId ? updatedGroup : cg
+        //   )
+        // );
+
+        showToast("Group updated successfully!", "s");
+      } catch (error) {
+        showToast("Error updating group!", "e");
+      } finally {
+        actions.setLoading(false);
       }
-    );
-    return () => unsubscribe();
-  }),
+    }
+  ),
 
   deleteEmergencyContactGroup: thunk(
     async (actions, { groupId }, { getState }) => {
       try {
+        actions.setLoading(true);
+
         await deleteDoc(doc(firestore, "emergencyContacts", groupId));
 
         // Update state immediately
@@ -107,6 +159,8 @@ const emergencyContactsModel: EmergencyContactsModel = {
         showToast("Group removed successfully!", "s");
       } catch (error) {
         showToast("Error removing group!", "e");
+      } finally {
+        actions.setLoading(false);
       }
     }
   ),
@@ -206,8 +260,26 @@ const emergencyContactsModel: EmergencyContactsModel = {
     }
   ),
 
+  listenEmergencyContacts: thunk((actions) => {
+    const unsubscribe = onSnapshot(
+      collection(firestore, "emergencyContacts"),
+      (snapshot) => {
+        const updatedContacts = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as EmergencyContact[];
+        actions.setEmergencyContacts(updatedContacts);
+      }
+    );
+    return () => unsubscribe();
+  }),
+
   setEmergencyContacts: action((state, contacts) => {
     state.emergencyContacts = contacts;
+  }),
+
+  setLoading: action((state, payload) => {
+    state.loading = payload;
   }),
 };
 
