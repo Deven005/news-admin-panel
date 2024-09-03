@@ -37,9 +37,9 @@ const FAQs = () => {
   });
 
   const handleEditClick = (index: number, faq: any) => {
-    setEditingIndex(index);
     setValue("title", faq.title);
     setValue("description", faq.description);
+    setEditingIndex(index);
   };
 
   const handleSaveClick = async (data: any, faqId: string) => {
@@ -155,7 +155,8 @@ const FAQs = () => {
                       type="text"
                       label="Title"
                       placeholder="Title"
-                      register={register("title")}
+                      // register={register("title")}
+                      {...register("title")}
                       error={errors.title}
                     />
                     <InputTextAreaField
