@@ -90,29 +90,34 @@ const News = () => {
     <Loading />
   ) : (
     <>
-      <div className="flex justify-between items-center mb-4 px-7 pt-6">
-        <button
-          onClick={() => router.push(`${pathname}/news/create`)}
-          className="btn btn-primary"
-        >
-          Add New News
-        </button>
+      <div className="mb-4 px-7 pt-6 grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
+      {/* Add New News Button */}
+      <button
+        onClick={() => router.push(`${pathname}/news/create`)}
+        className="btn btn-primary col-span-1 py-1 px-3 text-sm font-medium"
+      >
+        Add New News
+      </button>
 
-        <div className="flex space-x-4">
-          <input
-            type="text"
-            placeholder="Search by title..."
-            className="input input-bordered"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      {/* Search Input */}
+      <div className="col-span-1">
+        <input
+          type="text"
+          placeholder="Search by title..."
+          className="input input-bordered w-full text-lg py-4 px-5"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-        <div className="flex space-x-4">
+      {/* Filters and Sorting */}
+      <div className="col-span-2 flex flex-col sm:flex-row gap-4">
+        {/* Taluka Filter */}
+        <div className="flex-1">
           <select
             value={selectedTaluka}
             onChange={(e) => setSelectedTaluka(e.target.value)}
-            className="select select-bordered"
+            className="select select-bordered w-full text-sm py-1 px-2"
           >
             <option value="all">All Talukas</option>
             {talukas.map((taluka) => (
@@ -122,7 +127,23 @@ const News = () => {
             ))}
           </select>
         </div>
+
+        {/* Sort By */}
+        <div className="flex-1">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="select select-bordered w-full text-sm py-1 px-2"
+          >
+            <option value="timestampCreatedAt">Newest First</option>
+            <option value="likes">Most Likes</option>
+            <option value="dislikes">Most Dislikes</option>
+            <option value="views">Most Views</option>
+            <option value="shares">Most Shares</option>
+          </select>
+        </div>
       </div>
+    </div>
 
       {filteredNews.length === 0 ? (
         <div
@@ -137,13 +158,6 @@ const News = () => {
         </div>
       ) : (
         <>
-          <select onChange={(e) => setSortBy(e.target.value)} value={sortBy}>
-            <option value="timestampCreatedAt">Newest First</option>
-            <option value="likes">Most Likes</option>
-            <option value="dislikes">Most Dislikes</option>
-            <option value="views">Most Views</option>
-            <option value="shares">Most Shares</option>
-          </select>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
             {filteredNews.map((item, index) => (
               <div
