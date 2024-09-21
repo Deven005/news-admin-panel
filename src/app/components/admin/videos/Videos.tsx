@@ -47,7 +47,12 @@ const VideosPage: React.FC = () => {
     }
   };
 
-  const handleEditVideo = (id: string) => {
+  const handleEditVideo = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    id: string
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
     router.push(`${pathName}/videos/${id}`);
   };
 
@@ -71,18 +76,19 @@ const VideosPage: React.FC = () => {
             <div
               key={video.videoID}
               className="card bg-base-100 shadow-lg rounded-lg overflow-hidden"
-              onClick={() => handleEditVideo(video.videoID)}
+              // onClick={() => handleEditVideo(video.videoID)}
             >
               <figure className="relative">
                 <video
                   controls
                   src={video.videoFile.downloadUrl}
                   className="w-full h-48 object-cover"
+                  itemID={video.videoID}
                 />
                 <div className="absolute top-2 right-2 flex space-x-2">
                   <button
                     // href={`${pathName}/videos/${video.videoID}`}
-                    onClick={() => handleEditVideo(video.videoID)}
+                    onClick={(e) => handleEditVideo(e, video.videoID)}
                     className="btn btn-primary btn-sm"
                   >
                     Edit
