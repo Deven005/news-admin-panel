@@ -19,6 +19,10 @@ const advertisesCollectionName: string = "advertises";
 const storesCollectionName: string = "stores";
 
 async function doApiCall({ url, formData, callType }: ApiCallInput) {
+  if (auth.currentUser == null) {
+    console.log("Login / Register User");
+    return;
+  }
   var methodType = "";
 
   switch (callType) {
@@ -51,14 +55,12 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
   // http://localhost:8080/api
   // API_URL
 
-  return fetch(
-    `https://news-backend-573329204030.asia-south1.run.app/api${url}`,
-    {
-      method: methodType,
-      body: formData,
-      headers: headers,
-    }
-  );
+  return fetch(`https://news-backend-45h4p5l4ua-el.a.run.app/api${url}`, {
+    method: methodType,
+    body: formData,
+    headers: headers,
+    priority: "high",
+  });
 }
 
 const formatDate = (date: Timestamp | Date | string | undefined) => {
