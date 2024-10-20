@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "npm run build && gcloud run deploy news-admin-panel --source . --platform managed"
+    "deploy": "npm run build && gcloud run deploy news-admin-panel --source . --platform managed --allow-unauthenticated"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

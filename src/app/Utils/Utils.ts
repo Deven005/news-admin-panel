@@ -21,7 +21,7 @@ const storesCollectionName: string = "stores";
 async function doApiCall({ url, formData, callType }: ApiCallInput) {
   if (auth.currentUser == null) {
     console.log("Login / Register User");
-    return;
+    return new Response();
   }
   var methodType = "";
 
@@ -40,12 +40,6 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
       break;
   }
 
-  const headers = new Headers();
-  headers.append(
-    "Authorization",
-    `Bearer ${await auth.currentUser?.getIdToken()}`
-  );
-
   // "https://news-backend-45h4p5l4ua-el.a.run.app/api";
   // "https://news-backend-573329204030.asia-south1.run.app/api";
 
@@ -58,8 +52,9 @@ async function doApiCall({ url, formData, callType }: ApiCallInput) {
   return fetch(`https://news-backend-45h4p5l4ua-el.a.run.app/api${url}`, {
     method: methodType,
     body: formData,
-    headers: headers,
-    priority: "high",
+    headers: {
+      Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
+    },
   });
 }
 
